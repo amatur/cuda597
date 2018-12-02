@@ -308,15 +308,15 @@ float *X_New_gpu, *X_Old_gpu,
 
 
 	int gridSize, blockSize, minGridSize;
-//cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, jacobiOnDevice, 0, N);
-
-//printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, blockSize);
+   cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, jacobiOnDevice, 0, N);
+gridSize = (matrixSize + blockSize - 1) / blockSize;
+printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, blockSize);
 	//dim3 threadsPerBlock(16);
 	// dim3 numBlocks(N / threadsPerBlock.x);
 
 	//do sweeps until diff under tolerance
-	gridSize = strtol(argv[2], NULL, 10);
-	blockSize = strtol(argv[3], NULL, 10);
+	//gridSize = strtol(argv[2], NULL, 10);
+	//blockSize = strtol(argv[3], NULL, 10);
 	int Iteration = 0;
 cudaDeviceSynchronize();
 	int cpuConvergenceTest = 0;
