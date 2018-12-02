@@ -93,7 +93,7 @@ jacobi_p_unopt.o: jacobi_p_unopt.cpp jacobi.h
 
 
 
-lu: lu.o
+lu: lu.o matrix_util.o
 	$(CXX) $(CCFLAGS) -o $@ $^
 
 test: test.o jacobi.o lu.o matrix_util.o
