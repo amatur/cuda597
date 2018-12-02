@@ -10,18 +10,18 @@
 
 __device__ int flag;
 
-void init2d(double ***A, int n){
-	double** B = (double**) calloc(n,sizeof(double*));
+void init2d(float ***A, int n){
+	float** B = (float**) calloc(n,sizeof(float*));
     for(int i =0; i <n; i++){
-		B[i] = (double*) calloc(n,sizeof(double));
+		B[i] = (float*) calloc(n,sizeof(float));
 	}
 	*A = B;
 }
 
-void init2d(double ***A, double ***A2, int n){
-	double** B = (double**) calloc(n,sizeof(double*));
+void init2d(float ***A, float ***A2, int n){
+	float** B = (float**) calloc(n,sizeof(float*));
     for(int i =0; i <n; i++){
-		B[i] = (double*) calloc(n,sizeof(double));
+		B[i] = (float*) calloc(n,sizeof(float));
 
 	}
 	for (int y = 0; y < n; y++) {
@@ -34,13 +34,13 @@ void init2d(double ***A, double ***A2, int n){
 
 
 
-void init1d(double **A, int n){
-	double* B = (double*) calloc(n,sizeof(double));
+void init1d(float **A, int n){
+	float* B = (float*) calloc(n,sizeof(float));
 	*A = B;
 }
 
 
-void print(double *mat, int numRows){
+void print(float *mat, int numRows){
 
 	for (int x = 0; x < numRows; x++) {
 		printf("%-20.3f ", mat[x]);
@@ -49,7 +49,7 @@ void print(double *mat, int numRows){
 
 }
 
-void print(double **mat, int numRows){
+void print(float **mat, int numRows){
 	for (int y = 0; y < numRows; y++) {
 		for (int x = 0; x < numRows; x++) {
             printf("%-20.3f ", mat[y][x]);
@@ -61,7 +61,7 @@ void print(double **mat, int numRows){
 
 
 
-void convertTo1D(double** A, double* A_1d, int N){
+void convertTo1D(float** A, float* A_1d, int N){
 	int k    = 0;
 	for(int irow=0; irow<N; irow++)
 	for(int icol=0; icol<N; icol++)
@@ -69,29 +69,29 @@ void convertTo1D(double** A, double* A_1d, int N){
 }
 
 
-void jacobiSolve(int n, double** A, double* B, double* x, double eps = 1e-10, int maxit = 100){
+void jacobiSolve(int n, float** A, float* B, float* x, float eps = 1e-10, int maxit = 100){
 	memset(x, 0, n*sizeof(*x)); //init guess
 
 	//random initialization
 	for(int j=0; j<n; j++)
 	{
-		x[j] = (double)rand()/(double)(RAND_MAX)*1.0;
+		x[j] = (float)rand()/(float)(RAND_MAX)*1.0;
 	}
 
-	double* sigma = (double*) calloc(n,sizeof(double));
+	float* sigma = (float*) calloc(n,sizeof(float));
 
-	double* y = (double*) calloc(n,sizeof(double));
+	float* y = (float*) calloc(n,sizeof(float));
 
-	//double *C = (double *) malloc( n * sizeof(double));
+	//float *C = (float *) malloc( n * sizeof(float));
 	int it = 0;
 
 	int k = 0;
 	do{
 		it++;
 
-		double totSum = 0.0;
-		double localSum = 0.0;
-		double localInd = 0.0;
+		float totSum = 0.0;
+		float localSum = 0.0;
+		float localInd = 0.0;
 		for (int i=0; i<n; i++) {
 			sigma[i] = B[i];
 			for (int j = 0; j < n; j++) {
@@ -150,18 +150,18 @@ void jacobiSolve(int n, double** A, double* B, double* x, double eps = 1e-10, in
 /**
 * @brief   Randomly Initialize the A matrix
 */
-void fillA_random(double **A, int n){
+void fillA_random(float **A, int n){
 	int countA,countB;
 	for (countA=0; countA<n; countA++)
 	{
 		for (countB=0; countB<n; countB++)
 		{
-			A[countA][countB]=(double)rand()/(double)(RAND_MAX)*1.0;
+			A[countA][countB]=(float)rand()/(float)(RAND_MAX)*1.0;
 		}
 	}
 }
 
-void fillA_poisson(double **A, int n){
+void fillA_poisson(float **A, int n){
 
 	for(int i = 0; i<n*n; i++){
 		for(int j = 0; j<n*n; j++){
@@ -182,16 +182,16 @@ void fillA_poisson(double **A, int n){
 
 }
 
-void fillB(double *b, int n){
+void fillB(float *b, int n){
 	for(int i =0; i<n; i++)
 	{
-		b[i] = -1 + 2.0* (double)rand()/(double)((RAND_MAX)*1.0);
+		b[i] = -1 + 2.0* (float)rand()/(float)((RAND_MAX)*1.0);
 	}
 }
 
-double getError(double *x, double *xnew, int N)
+float getError(float *x, float *xnew, int N)
 {
-	double sum = 0.0;
+	float sum = 0.0;
 	for(int index=0; index<N; index++)
 	sum += (xnew[index] - x[index])*(xnew[index]-x[index]);
 	sum = sqrt(sum);
@@ -199,10 +199,10 @@ double getError(double *x, double *xnew, int N)
 }
 
 // Device version of the Jacobi method
-__global__ void jacobiOnDevice(double* A, double* b, double* X_New, double* X_Old, int N, double eps){
+__global__ void jacobiOnDevice(float* A, float* b, float* X_New, float* X_Old, int N, float eps){
 
 	unsigned int i, j;
-	double sigma = 0, newValue;
+	float sigma = 0, newValue;
 
 	i = threadIdx.x + blockIdx.x * blockDim.x;
 
@@ -224,21 +224,21 @@ int main(int argc, char* argv[]){
 	//int numBlocks = 4;
 	//int blockSize = 1;
 	// initialize timing variables
-	double t_start, t_end, time_secs;
+	float t_start, t_end, time_secs;
 
-	double **A, *A_1d, *b;
-	double *X_New, *X_Old, *x;
+	float **A, *A_1d, *b;
+	float *X_New, *X_Old, *x;
 
 // gpu Copy
-double *A_1d_gpu, *b_gpu;
-double *X_New_gpu, *X_Old_gpu,
+float *A_1d_gpu, *b_gpu;
+float *X_New_gpu, *X_Old_gpu,
 
 	srand(0);
 	int n = strtol(argv[1], NULL, 10);
 	int N = n*n;
 	//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-//
 	// Set our tolerance and maximum iterations
-	double eps = 1.0e-4;
+	float eps = 1.0e-4;
 	int maxit = 2*N*N;
 
 
@@ -261,29 +261,29 @@ double *X_New_gpu, *X_Old_gpu,
 
 
 		/* ...Convert Matrix_A into 1-D array Input_A ......*/
-		A_1d  = (double *)malloc(N*N*sizeof(double));
+		A_1d  = (float *)malloc(N*N*sizeof(float));
 		convertTo1D(A, A_1d, N);
 
 	// STARTING cuda
 
 	// on HOST
 	//initialize auxiliary data structures
-	X_New  = (double *) malloc (N * sizeof(double));
-	X_Old  = (double *) malloc (N * sizeof(double));
+	X_New  = (float *) malloc (N * sizeof(float));
+	X_Old  = (float *) malloc (N * sizeof(float));
 
 	// Allocate memory on the device
-	 assert(cudaSuccess == cudaMalloc((void **) &X_New_gpu, N*sizeof(double)));
-	 assert(cudaSuccess == cudaMalloc((void **) &A_1d_gpu, N*N*sizeof(double)));
-	 assert(cudaSuccess == cudaMalloc((void **) &X_Old_gpu, N*sizeof(double)));
-	 assert(cudaSuccess == cudaMalloc((void **) &b_gpu, N*sizeof(double)));
+	 assert(cudaSuccess == cudaMalloc((void **) &X_New_gpu, N*sizeof(float)));
+	 assert(cudaSuccess == cudaMalloc((void **) &A_1d_gpu, N*N*sizeof(float)));
+	 assert(cudaSuccess == cudaMalloc((void **) &X_Old_gpu, N*sizeof(float)));
+	 assert(cudaSuccess == cudaMalloc((void **) &b_gpu, N*sizeof(float)));
 
 	 // Copy data -> device
-	 cudaMemcpy(X_New_gpu, X_New, sizeof(double)*N, cudaMemcpyHostToDevice);
-	 cudaMemcpy(A_1d_gpu, A_1d, sizeof(double)*N*N, cudaMemcpyHostToDevice);
-	 cudaMemcpy(X_Old_gpu, X_Old, sizeof(double)*N, cudaMemcpyHostToDevice);
-	 cudaMemcpy(b_gpu, b, sizeof(double)*N, cudaMemcpyHostToDevice);
+	 cudaMemcpy(X_New_gpu, X_New, sizeof(float)*N, cudaMemcpyHostToDevice);
+	 cudaMemcpy(A_1d_gpu, A_1d, sizeof(float)*N*N, cudaMemcpyHostToDevice);
+	 cudaMemcpy(X_Old_gpu, X_Old, sizeof(float)*N, cudaMemcpyHostToDevice);
+	 cudaMemcpy(b_gpu, b, sizeof(float)*N, cudaMemcpyHostToDevice);
 
-	//  cudaStatus = cudaMemcpy(x0, dev_x0, matrixSize* sizeof(double), cudaMemcpyDeviceToHost);
+	//  cudaStatus = cudaMemcpy(x0, dev_x0, matrixSize* sizeof(float), cudaMemcpyDeviceToHost);
 	// if (cudaStatus != cudaSuccess) {
 	// 	fprintf(stderr, "cudaMemcpy failed!");
 	// 	goto Error;
@@ -322,11 +322,11 @@ double *X_New_gpu, *X_Old_gpu,
 				cudaMemcpyFromSymbol(&cpuConvergenceTest, flag, sizeof(int));
 
 		Iteration += 1;
-		//cudaMemcpy(X_New, X_New_gpu, sizeof(double)*N, cudaMemcpyDeviceToHost);
-		//cudaMemcpy(X_Old, X_Old_gpu, sizeof(double)*N, cudaMemcpyDeviceToHost);
+		//cudaMemcpy(X_New, X_New_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
+		//cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 
 	}while( (Iteration < maxit) && !cpuConvergenceTest);
-	//cudaMemcpy(X_New, X_New_gpu, sizeof(double)*N, cudaMemcpyDeviceToHost);
+	cudaMemcpy(X_New, X_New_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 print(X_New, N);
 	// Data <- device
 
