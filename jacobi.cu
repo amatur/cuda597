@@ -302,6 +302,8 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 	// dim3 numBlocks(N / threadsPerBlock.x);
 
 	//do sweeps until diff under tolerance
+	gridSize = strtol(argv[2], NULL, 10);
+	blockSize = strtol(argv[3], NULL, 10);
 	int Iteration = 0;
 
 	int cpuConvergenceTest = 0;
