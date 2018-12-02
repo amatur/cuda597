@@ -222,6 +222,9 @@ __global__ void jacobiOnDevice(float* A, float* b, float* X_New, float* X_Old, i
 
 
 int main(int argc, char* argv[]){
+	cudaEvent_t start, stop;
+	cudaEventCreate(&start);
+	cudaEventCreate(&stop);
 
 	cudaError_t  cudaStatus;
 
@@ -265,9 +268,9 @@ float *X_New_gpu, *X_Old_gpu,
 
 	//fill b
 	fillB(b, n);
-	jacobiSolve(N, A, b, x, eps, maxit);
-	print(x, N);
-	printf("Correct one\n");
+	//jacobiSolve(N, A, b, x, eps, maxit);
+	//print(x, N);
+	//printf("Correct one\n");
 
 
 		/* ...Convert Matrix_A into 1-D array Input_A ......*/
@@ -359,5 +362,10 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 
 	printf("%lf\n", time_secs);
 
+
+	// cudaEventSynchronize(stop);
+	// 	float milliseconds = 0;
+	// cudaEventElapsedTime(&milliseconds, start, stop);
+	// 	printf("Milli %lf\n", milliseconds);
 	return 0;
 }
