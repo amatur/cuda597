@@ -215,7 +215,7 @@ __global__ void jacobiOnDevice(float* A, float* b, float* X_New, float* X_Old, i
 	newValue = (b[i] - sigma) / A[i*N + i];
 
 	if (abs(X_Old[i] - newValue) > eps) flag = 0;
-	X_Old[i] = b[i];
+	X_Old[i] = newValue;
 
 }
 
@@ -338,7 +338,7 @@ float *X_New_gpu, *X_Old_gpu,
 		//cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 
 	}while( (Iteration < maxit) && !cpuConvergenceTest);
-	cudaMemcpy(b, b_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
+	cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 print(b, N);
 	// Data <- device
 
