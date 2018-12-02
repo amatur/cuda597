@@ -219,8 +219,8 @@ __global__ void jacobiOnDevice(double* A, double* b, double* X_New, double* X_Ol
 
 
 int main(int argc, char* argv[]){
-
 	int numBlocks = 8;
+	int blockSize = 1;
 	// initialize timing variables
 	double t_start, t_end, time_secs;
 
@@ -295,11 +295,9 @@ double *X_New_gpu, *X_Old_gpu,
 	int Iteration = 0;
 
 
-int nBlocks = 16;
-int blockSize = 1;
 	do{
 		//#error Add GPU kernel calls here (see CPU version above)
-		jacobiOnDevice <<< nBlocks, blockSize >>> (A_1d_gpu, b_gpu, X_New_gpu, X_Old_gpu, N, num_rows_block);
+		jacobiOnDevice <<< numBlocks, blockSize >>> (A_1d_gpu, b_gpu, X_New_gpu, X_Old_gpu, N, num_rows_block);
 		//jacobi<<16,1>>
 		cudaDeviceSynchronize();
 		Iteration += 1;
@@ -312,8 +310,8 @@ int blockSize = 1;
 
 
     // Free memory
-    free(X_Old); free(A); free(A_1d);free(A); free(b);
-    cudaFree(X_New_gpu); cudaFree(X_Old_gpu); cudaFree(b_gpu); cudaFree(A_1d_gpu);
+    //free(X_Old); free(A); free(A_1d);free(A); free(b);
+  //  cudaFree(X_New_gpu); cudaFree(X_Old_gpu); cudaFree(b_gpu); cudaFree(A_1d_gpu);
 
 	//free(X_old);
 	//free(Bloc_X);
