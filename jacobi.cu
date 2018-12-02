@@ -257,6 +257,9 @@ double *X_New_gpu, *X_Old_gpu,
 	print(x, N);
 
 
+		/* ...Convert Matrix_A into 1-D array Input_A ......*/
+		A_1d  = (double *)malloc(N*N*sizeof(double));
+		convertTo1D(A, A_1d, N);
 
 	// STARTING cuda
 
@@ -281,9 +284,6 @@ double *X_New_gpu, *X_Old_gpu,
 
 	t_start = clock();
 
-	/* ...Convert Matrix_A into 1-D array Input_A ......*/
-	A_1d  = (double *)malloc(N*N*sizeof(double));
-	convertTo1D(A, A_1d, N);
 
 	int num_rows_block = N/numBlocks;
 
