@@ -74,10 +74,8 @@ runsu:
 #~ 	echo "TESTING";\
 #~ 	./test
 
-jacobicu: jacobi.cu matrix_util.o
-	$(CC) -o jacobi $(CCFLAGS) -arch=compute_35 -code=sm_35 jacobi.cu matrix_util.o  ;
-	
-
+jacobicu: jacobi.cu
+	$(CC) -o jacobi $(CCFLAGS) -arch=compute_35 -code=sm_35 jacobi.cu 
 
 jacobi: jacobi.o matrix_util.o
 	$(CXX) $(CCFLAGS) -o $@ $^ $(LIBS)
