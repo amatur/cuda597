@@ -315,8 +315,7 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 
 		cudaError_t cudaStatus = cudaDeviceSynchronize();
 				if (cudaStatus != cudaSuccess) {
-					fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching jacobi!\n", cudaStatus);
-					goto Error;
+					printf("cudaDeviceSynchronize returned error code %d after launching jacobi!\n", cudaStatus);
 				}
 
 				cudaMemcpyFromSymbol(&cpuConvergenceTest, flag, sizeof(int));
