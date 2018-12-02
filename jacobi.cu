@@ -301,8 +301,8 @@ double *X_New_gpu, *X_Old_gpu,
 		//jacobi<<16,1>>
 		cudaDeviceSynchronize();
 		Iteration += 1;
-		cudaMemcpy(X_New, X_New_gpu, sizeof(double)*N, cudaMemcpyDeviceToHost);
-		cudaMemcpy(X_Old, X_Old_gpu, sizeof(double)*N, cudaMemcpyDeviceToHost);
+		//cudaMemcpy(X_New, X_New_gpu, sizeof(double)*N, cudaMemcpyDeviceToHost);
+		//cudaMemcpy(X_Old, X_Old_gpu, sizeof(double)*N, cudaMemcpyDeviceToHost);
 
 	}while( (Iteration < maxit) && (getError(X_Old, X_New, N) >= eps));
 	//cudaMemcpy(X_New, X_New_gpu, sizeof(double)*N, cudaMemcpyDeviceToHost);
