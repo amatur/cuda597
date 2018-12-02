@@ -324,7 +324,7 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 	//gridSize = strtol(argv[2], NULL, 10);
 	//blockSize = strtol(argv[3], NULL, 10);
 	int Iteration = 0;
-cudaDeviceSynchronize();
+//cudaDeviceSynchronize();
 	int cpuConvergenceTest = 0;
 	do{
 		cpuConvergenceTest = 1;
@@ -361,13 +361,13 @@ cudaEventRecord(stop);
 	float milliseconds = 0;
 cudaEventElapsedTime(&milliseconds, start, stop);
 
-
+	cudaDeviceSynchronize();
 	t_end = clock();
 	time_secs = t_end - t_start;
 	//cout<< "Time(sec): "<< time_secs << endl;
 
 	printf("%lf\n", time_secs);
 	printf("Milli %lf\n", milliseconds);
-	cudaDeviceSynchronize();
+
 	return 0;
 }
