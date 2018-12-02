@@ -201,22 +201,6 @@ double getError(double *x, double *xnew, int N)
 // Device version of the Jacobi method
 __global__ void jacobiOnDevice(double* A, double* b, double* X_New, double* X_Old, int N, double eps){
 
-	/*
-	int my_rank = blockIdx.x;
-//	int num_rows_block =  blockDim.x ;
-	//now do it for multiple passes
-
-	for(int irow = my_rank*num_rows_block; irow<(my_rank+1)*num_rows_block; irow++  ){
-		int index = irow * N;
-		for(int icol=0;  icol<N; icol++){
-			X_New[irow] -= X_Old[icol] * A[index + icol];
-		}
-		X_New[irow] = X_New[irow] / A[index + irow];
-		//sigma[i] /= A[i][i];
-	}
-	memcpy(X_Old, X_New, sizeof(double)*N);
-	*/
-
 	unsigned int i, j;
 	double sigma = 0, newValue;
 
@@ -308,12 +292,12 @@ double *X_New_gpu, *X_Old_gpu,
 	t_start = clock();
 
 
-	int num_rows_block = N/numBlocks;
+
 	int gridSize, blockSize, minGridSize;
 cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, jacobiOnDevice, 0, N);
 
 gridSize = (N + blockSize - 1) / blockSize;
-prinft("min grid size %d grid size %d, block size %d",minGridSize,gridSize, blockSize);
+printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, blockSize);
 	//dim3 threadsPerBlock(16);
 	// dim3 numBlocks(N / threadsPerBlock.x);
 
