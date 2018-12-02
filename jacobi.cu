@@ -322,7 +322,7 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 	//gridSize = strtol(argv[2], NULL, 10);
 	//blockSize = strtol(argv[3], NULL, 10);
 	int Iteration = 0;
-//cudaDeviceSynchronize();
+  cudaDeviceSynchronize();
 	int cpuConvergenceTest = 0;
 	do{
 		cpuConvergenceTest = 1;
@@ -345,7 +345,7 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 
 	}while( (Iteration < maxit) && !cpuConvergenceTest);
 	cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
-	print(X_Old, N);
+	//print(X_Old, N);
 	// Data <- device
 
     // Free memory
