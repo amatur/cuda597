@@ -294,9 +294,11 @@ double *X_New_gpu, *X_Old_gpu,
 	int Iteration = 0;
 
 
+int nBlock = 16;
+int blockSize = 1;
 	do{
 		//#error Add GPU kernel calls here (see CPU version above)
-		jacobiOnDevice<<16,1>>(A_1d_gpu, b_gpu, X_New_gpu, X_Old_gpu, N, num_rows_block);
+		jacobiOnDevice <<< nBlocks, blockSize >>> (A_1d_gpu, b_gpu, X_New_gpu, X_Old_gpu, N, num_rows_block);
 		//jacobi<<16,1>>
 		cudaDeviceSynchronize();
 		Iteration += 1;
