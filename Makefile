@@ -14,7 +14,7 @@ CXX=mpic++
 
 LIBS=-lm
 LDFLAGS=""
-CCFLAGS= -g -O3
+CCFLAGS=-g -O3
 
 #~ CCFLAGS=-Wall -O3
 
@@ -29,7 +29,7 @@ all: jacobicu
 #all: jacobi jacobi_p_unopt jacobi_s jacobi_s_opt
 
 runcu:
-	echo "## RUNNING CUDA JACOBI"; ./jacobi 10 \
+	echo "## RUNNING CUDA JACOBI"; ./jacobi 16 \
 
 
 data_parallel:
@@ -75,8 +75,8 @@ runsu:
 #~ 	./test
 
 jacobicu: jacobi.cu matrix_util.o
-        $(CC) -o jacobi $(CFLAGS) -arch=compute_35 -code=sm_35 $(LDFLAGS) jacobi.cu
-        echo "cuda code compiled"
+	$(CC) -o jacobi $(CFLAGS) -arch=compute_35 -code=sm_35 jacobi.cu ;
+  echo "cuda code compiled"
 
 jacobi: jacobi.o matrix_util.o
 	$(CXX) $(CCFLAGS) -o $@ $^ $(LIBS)
