@@ -7,7 +7,7 @@
 ## uncomment for parallel without tau
 #CXX=mpic++
 CC=nvcc
-CXX=mpic++
+CXX=gcc
 
 #CXX=tau_cxx.sh
 #CC=tau_cc.sh
@@ -76,7 +76,7 @@ runsu:
 
 jacobicu: jacobi.cu matrix_util.o
 	$(CC) -o jacobi $(CFLAGS) -arch=compute_35 -code=sm_35 jacobi.cu ;
-  echo "cuda code compiled"
+
 
 jacobi: jacobi.o matrix_util.o
 	$(CXX) $(CCFLAGS) -o $@ $^ $(LIBS)
