@@ -338,8 +338,8 @@ float *X_New_gpu, *X_Old_gpu,
 		//cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 
 	}while( (Iteration < maxit) && !cpuConvergenceTest);
-	cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
-print(X_Old, N);
+	cudaMemcpy(b, b_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
+print(b, N);
 	// Data <- device
 
 
