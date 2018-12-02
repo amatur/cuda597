@@ -277,11 +277,16 @@ float *X_New_gpu, *X_Old_gpu,
 	 assert(cudaSuccess == cudaMalloc((void **) &X_Old_gpu, N*sizeof(float)));
 	 assert(cudaSuccess == cudaMalloc((void **) &b_gpu, N*sizeof(float)));
 
+	 cudaError_t ct;
 	 // Copy data -> device
-	 cudaMemcpy(X_New_gpu, X_New, sizeof(float)*N, cudaMemcpyHostToDevice);
-	 cudaMemcpy(A_1d_gpu, A_1d, sizeof(float)*N*N, cudaMemcpyHostToDevice);
-	 cudaMemcpy(X_Old_gpu, X_Old, sizeof(float)*N, cudaMemcpyHostToDevice);
-	 cudaMemcpy(b_gpu, b, sizeof(float)*N, cudaMemcpyHostToDevice);
+	 ct = cudaMemcpy(X_New_gpu, X_New, sizeof(float)*N, cudaMemcpyHostToDevice);
+	 assert(ct==cudaSuccess);
+	 ct = cudaMemcpy(A_1d_gpu, A_1d, sizeof(float)*N*N, cudaMemcpyHostToDevice);
+	 assert(ct==cudaSuccess);
+	 ct = cudaMemcpy(X_Old_gpu, X_Old, sizeof(float)*N, cudaMemcpyHostToDevice);
+	 assert(ct==cudaSuccess);
+	 ct = cudaMemcpy(b_gpu, b, sizeof(float)*N, cudaMemcpyHostToDevice);
+	 assert(ct==cudaSuccess);
 
 	//  cudaStatus = cudaMemcpy(x0, dev_x0, matrixSize* sizeof(float), cudaMemcpyDeviceToHost);
 	// if (cudaStatus != cudaSuccess) {
@@ -326,7 +331,7 @@ float *X_New_gpu, *X_Old_gpu,
 		//cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 
 	}while( (Iteration < maxit) && !cpuConvergenceTest);
-	cudaMemcpy(X_New, X_New_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
+	cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 print(X_New, N);
 	// Data <- device
 
