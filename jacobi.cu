@@ -352,7 +352,6 @@ print(b, N);
 	t_end = clock();
 	time_secs = t_end - t_start;
 	//cout<< "Time(sec): "<< time_secs << endl;
-	print(X_New, N);
 
 	printf("%lf\n", time_secs);
 	return 0;
