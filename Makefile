@@ -7,8 +7,8 @@
 ## uncomment for parallel without tau
 #CXX=mpic++
 CC=gcc
-
-CXX=tau_cxx.sh
+CXX=mpic++
+#CXX=tau_cxx.sh
 #CC=tau_cc.sh
 
 LIBS=-lm
