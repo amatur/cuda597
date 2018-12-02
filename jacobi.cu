@@ -211,7 +211,7 @@ __global__ void jacobiOnDevice(float* A, float* b, float* X_New, float* X_Old, i
 			sigma = sigma + A[i*N + j] * X_Old[j];
 		}
 	}
-	assert(A[i*N+i] != 0);
+	//assert(A[i*N+i] != 0);
 	newValue = (b[i] - sigma) / A[i*N + i];
 
 	if (abs(X_Old[i] - newValue) > eps) flag = 0;
