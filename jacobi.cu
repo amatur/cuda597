@@ -222,6 +222,10 @@ __global__ void jacobiOnDevice(float* A, float* b, float* X_New, float* X_Old, i
 
 
 int main(int argc, char* argv[]){
+	cudaEvent_t start, stop;
+cudaEventCreate(&start);
+cudaEventCreate(&stop);
+
 	cudaError_t  cudaStatus;
 
 	cudaStatus = cudaSetDevice(0);
@@ -272,6 +276,8 @@ float *X_New_gpu, *X_Old_gpu,
 		/* ...Convert Matrix_A into 1-D array Input_A ......*/
 		A_1d  = (float *)malloc(N*N*sizeof(float));
 		convertTo1D(A, A_1d, N);
+
+		cudaEventRecord(start);
 
 	// STARTING cuda
 
@@ -343,7 +349,7 @@ cudaDeviceSynchronize();
 	cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 	print(X_Old, N);
 	// Data <- device
-
+cudaEventRecord(stop);
 
     // Free memory
     //free(X_Old); free(A); free(A_1d);free(A); free(b);
@@ -351,11 +357,17 @@ cudaDeviceSynchronize();
 
 	//free(X_old);
 	//free(Bloc_X);
+	cudaEventSynchronize(stop);
+	float milliseconds = 0;
+cudaEventElapsedTime(&milliseconds, start, stop);
+
+
 	t_end = clock();
 	time_secs = t_end - t_start;
 	//cout<< "Time(sec): "<< time_secs << endl;
 
 	printf("%lf\n", time_secs);
+	printf("Milli %lf\n", milliseconds);
 	cudaDeviceSynchronize();
 	return 0;
 }
