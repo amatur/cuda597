@@ -205,7 +205,7 @@ __global__ void jacobiOnDevice(float* A, float* b, float* X_New, float* X_Old, i
 	float sigma = 0, newValue;
 
 	i = threadIdx.x + blockIdx.x * blockDim.x;
-
+	printf("%d  IAAAA", i);
 	for (j = 0; j < N; j++) {
 		if (i != j) {
 			sigma = sigma + A[i*N + j] * X_Old[j];
@@ -215,7 +215,8 @@ __global__ void jacobiOnDevice(float* A, float* b, float* X_New, float* X_Old, i
 	newValue = (b[i] - sigma) / A[i*N + i];
 
 	if (abs(X_Old[i] - newValue) > eps) flag = 0;
-	X_Old[i] = newValue;
+	X_Old[i] = b[i];
+	//newValue;
 
 }
 
@@ -316,7 +317,7 @@ float *X_New_gpu, *X_Old_gpu,
 	gridSize = strtol(argv[2], NULL, 10);
 	blockSize = strtol(argv[3], NULL, 10);
 	int Iteration = 0;
-
+cudaDeviceSynchronize();
 	int cpuConvergenceTest = 0;
 	do{
 		cpuConvergenceTest = 1;
@@ -354,6 +355,6 @@ float *X_New_gpu, *X_Old_gpu,
 	//cout<< "Time(sec): "<< time_secs << endl;
 
 	printf("%lf\n", time_secs);
-	system("pause");
+	cudaDeviceSynchronize();
 	return 0;
 }
