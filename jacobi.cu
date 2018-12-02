@@ -294,7 +294,7 @@ double *X_New_gpu, *X_Old_gpu,
 	int Iteration = 0;
 
 
-int nBlock = 16;
+int nBlocks = 16;
 int blockSize = 1;
 	do{
 		//#error Add GPU kernel calls here (see CPU version above)
