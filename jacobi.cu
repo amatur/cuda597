@@ -263,8 +263,8 @@ float *X_New_gpu, *X_Old_gpu,
 
 	//fill b
 	fillB(b, n);
-	jacobiSolve(N, A, b, x, eps, maxit);
-	print(x, N);
+	//jacobiSolve(N, A, b, x, eps, maxit);
+	//print(x, N);
 
 
 		/* ...Convert Matrix_A into 1-D array Input_A ......*/
@@ -339,7 +339,7 @@ float *X_New_gpu, *X_Old_gpu,
 
 	}while( (Iteration < maxit) && !cpuConvergenceTest);
 	cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
-print(b, N);
+	print(X_Old, N);
 	// Data <- device
 
 
@@ -354,5 +354,6 @@ print(b, N);
 	//cout<< "Time(sec): "<< time_secs << endl;
 
 	printf("%lf\n", time_secs);
+	system("pause");
 	return 0;
 }
