@@ -296,8 +296,7 @@ double *X_New_gpu, *X_Old_gpu,
 	int gridSize, blockSize, minGridSize;
 //cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, jacobiOnDevice, 0, N);
 
-gridSize = (N + blockSize - 1) / blockSize;
-printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, blockSize);
+//printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, blockSize);
 	//dim3 threadsPerBlock(16);
 	// dim3 numBlocks(N / threadsPerBlock.x);
 
