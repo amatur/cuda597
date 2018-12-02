@@ -215,12 +215,19 @@ __global__ void jacobiOnDevice(float* A, float* b, float* X_New, float* X_Old, i
 	newValue = (b[i] - sigma) / A[i*N + i];
 
 	if (abs(X_Old[i] - newValue) > eps) flag = 0;
-	X_Old[i] = newValue;
+	X_Old[i] = b[i];
 
 }
 
 
 int main(int argc, char* argv[]){
+	cudaError_t  cudaStatus;
+
+	cudaStatus = cudaSetDevice(0);
+	if (cudaStatus != cudaSuccess) {
+		printf("cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");
+
+	}
 	//int numBlocks = 4;
 	//int blockSize = 1;
 	// initialize timing variables
@@ -332,7 +339,7 @@ float *X_New_gpu, *X_Old_gpu,
 
 	}while( (Iteration < maxit) && !cpuConvergenceTest);
 	cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
-print(X_New, N);
+print(X_Old, N);
 	// Data <- device
 
 
