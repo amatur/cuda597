@@ -199,7 +199,7 @@ double getError(double *x, double *xnew, int N)
 }
 
 // Device version of the Jacobi method
-__global__ void jacobiOnDevice(double* A, double* b, double* X_New, double* X_Old, int N, double eps, int num_rows_block){
+__global__ void jacobiOnDevice(double* A, double* b, double* X_New, double* X_Old, int N, double eps){
 
 	/*
 	int my_rank = blockIdx.x;
@@ -310,10 +310,10 @@ double *X_New_gpu, *X_Old_gpu,
 
 	int num_rows_block = N/numBlocks;
 	int gridSize, blockSize, minGridSize;
-cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, internal_jacobi_solve, 0, matrixSize);
+cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, jacobiOnDevice, 0, N);
 
 gridSize = (N + blockSize - 1) / blockSize;
-prinf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, blockSize);
+prinft("min grid size %d grid size %d, block size %d",minGridSize,gridSize, blockSize);
 	//dim3 threadsPerBlock(16);
 	// dim3 numBlocks(N / threadsPerBlock.x);
 
@@ -326,7 +326,7 @@ prinf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, block
 		cudaMemcpyToSymbol(flag, &cpuConvergenceTest, sizeof(int));
 
 		//#error Add GPU kernel calls here (see CPU version above)
-		jacobiOnDevice <<< gridSize, blockSize >>> (A_1d_gpu, b_gpu, X_New_gpu, X_Old_gpu, N, num_rows_block);
+		jacobiOnDevice <<< gridSize, blockSize >>> (A_1d_gpu, b_gpu, X_New_gpu, X_Old_gpu, N, eps);
 		//jacobi<<16,1>>
 
 		cudaError_t cudaStatus = cudaDeviceSynchronize();
