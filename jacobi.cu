@@ -200,7 +200,7 @@ int main(int argc, char* argv[]){
 	//fill b
 	fillB(b, n);
 	jacobiSolve(N, A, b, x, eps, maxit);
-	print(x);
+	print(x, N);
 
 	t_start = clock();
 
@@ -232,7 +232,7 @@ int main(int argc, char* argv[]){
 	t_end = clock();
 	time_secs = t_end - t_start;
 	//cout<< "Time(sec): "<< time_secs << endl;
-	print(X_New);
+	print(X_New, N);
 	cout<< time_secs << endl;
 	return 0;
 }
