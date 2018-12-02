@@ -13,7 +13,7 @@ CXX=mpic++
 #CC=tau_cc.sh
 
 LIBS=-lm
-LDFLAGS=
+LDFLAGS=""
 CCFLAGS= -g -O3
 
 #~ CCFLAGS=-Wall -O3
