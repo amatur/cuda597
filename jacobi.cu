@@ -8,6 +8,7 @@
 #include<assert.h>
 //using namespace std;
 
+__device__ int flag;
 
 void init2d(double ***A, int n){
 	double** B = (double**) calloc(n,sizeof(double*));
@@ -198,10 +199,9 @@ double getError(double *x, double *xnew, int N)
 }
 
 // Device version of the Jacobi method
-__global__ void jacobiOnDevice(double* A, double* b, double* X_New, double* X_Old, int N, int num_rows_block){
-	//int idx = blockIdx.x * blockDim.x + threadIdx.x;
-	//int my_rank = blockIdx.x;
-	//int num_rows_block = blockDim.x;
+__global__ void jacobiOnDevice(double* A, double* b, double* X_New, double* X_Old, int N, double eps, int num_rows_block){
+
+	/*
 	int my_rank = blockIdx.x;
 //	int num_rows_block =  blockDim.x ;
 	//now do it for multiple passes
@@ -215,12 +215,30 @@ __global__ void jacobiOnDevice(double* A, double* b, double* X_New, double* X_Ol
 		//sigma[i] /= A[i][i];
 	}
 	memcpy(X_Old, X_New, sizeof(double)*N);
+	*/
+
+	unsigned int i, j;
+	double sigma = 0, newValue;
+
+	i = threadIdx.x + blockIdx.x * blockDim.x;
+
+	for (j = 0; j < N; j++) {
+		if (i != j) {
+			sigma = sigma + A[i*N + j] * X_Old[j];
+		}
+	}
+
+	newValue = (b[i] - sigma) / A[i*N + i];
+
+	if (abs(X_Old[i] - newValue) > eps) flag = 0;
+	X_Old[i] = newValue;
+
 }
 
 
 int main(int argc, char* argv[]){
-	int numBlocks = 16;
-	int blockSize = 1;
+	//int numBlocks = 4;
+	//int blockSize = 1;
 	// initialize timing variables
 	double t_start, t_end, time_secs;
 
@@ -281,30 +299,49 @@ double *X_New_gpu, *X_Old_gpu,
 	 cudaMemcpy(X_Old_gpu, X_Old, sizeof(double)*N, cudaMemcpyHostToDevice);
 	 cudaMemcpy(b_gpu, b, sizeof(double)*N, cudaMemcpyHostToDevice);
 
-
+	//  cudaStatus = cudaMemcpy(x0, dev_x0, matrixSize* sizeof(double), cudaMemcpyDeviceToHost);
+	// if (cudaStatus != cudaSuccess) {
+	// 	fprintf(stderr, "cudaMemcpy failed!");
+	// 	goto Error;
+	// }
 
 	t_start = clock();
 
 
 	int num_rows_block = N/numBlocks;
+	int gridSize, blockSize, minGridSize;
+cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, internal_jacobi_solve, 0, matrixSize);
 
+gridSize = (N + blockSize - 1) / blockSize;
+prinf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, blockSize);
 	//dim3 threadsPerBlock(16);
 	// dim3 numBlocks(N / threadsPerBlock.x);
 
 	//do sweeps until diff under tolerance
 	int Iteration = 0;
 
-
+	int cpuConvergenceTest = 0;
 	do{
+		cpuConvergenceTest = 1;
+		cudaMemcpyToSymbol(flag, &cpuConvergenceTest, sizeof(int));
+
 		//#error Add GPU kernel calls here (see CPU version above)
-		jacobiOnDevice <<< numBlocks, blockSize >>> (A_1d_gpu, b_gpu, X_New_gpu, X_Old_gpu, N, num_rows_block);
+		jacobiOnDevice <<< gridSize, blockSize >>> (A_1d_gpu, b_gpu, X_New_gpu, X_Old_gpu, N, num_rows_block);
 		//jacobi<<16,1>>
-		cudaDeviceSynchronize();
+
+		cudaError_t cudaStatus = cudaDeviceSynchronize();
+				if (cudaStatus != cudaSuccess) {
+					fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching jacobi!\n", cudaStatus);
+					goto Error;
+				}
+
+				cudaMemcpyFromSymbol(&cpuConvergenceTest, flag, sizeof(int));
+
 		Iteration += 1;
 		//cudaMemcpy(X_New, X_New_gpu, sizeof(double)*N, cudaMemcpyDeviceToHost);
 		//cudaMemcpy(X_Old, X_Old_gpu, sizeof(double)*N, cudaMemcpyDeviceToHost);
 
-	}while( (Iteration < maxit) && (getError(X_Old, X_New, N) >= eps));
+	}while( (Iteration < maxit) && !cpuConvergenceTest);
 	//cudaMemcpy(X_New, X_New_gpu, sizeof(double)*N, cudaMemcpyDeviceToHost);
 print(X_New, N);
 	// Data <- device
