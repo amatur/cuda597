@@ -264,8 +264,9 @@ float *X_New_gpu, *X_Old_gpu,
 
 	//fill b
 	fillB(b, n);
-	//jacobiSolve(N, A, b, x, eps, maxit);
-	//print(x, N);
+	jacobiSolve(N, A, b, x, eps, maxit);
+	print(x, N);
+	printf("Correct one\n", );
 
 
 		/* ...Convert Matrix_A into 1-D array Input_A ......*/
