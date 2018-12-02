@@ -6,13 +6,14 @@
 
 ## uncomment for parallel without tau
 #CXX=mpic++
-CC=gcc
+CC=nvcc
 CXX=mpic++
+
 #CXX=tau_cxx.sh
 #CC=tau_cc.sh
 
 LIBS=-lm
-
+LDFLAGS=
 CCFLAGS= -g -O3
 
 #~ CCFLAGS=-Wall -O3
@@ -24,8 +25,12 @@ CCFLAGS= -g -O3
 #uncomment this line for Parallel only
 #all: jacobi jacobi_p_unopt
 
-all: lu
+all: jacobicu
 #all: jacobi jacobi_p_unopt jacobi_s jacobi_s_opt
+
+runcu:
+	echo "## RUNNING CUDA JACOBI"; ./jacobi 10 \
+
 
 data_parallel:
 	for i in 10;\
@@ -68,6 +73,10 @@ runsu:
 #~ test:
 #~ 	echo "TESTING";\
 #~ 	./test
+
+jacobicu: jacobi.cu matrix_util.o
+        $(CC) -o jacobi $(CFLAGS) -arch=compute_35 -code=sm_35 $(LDFLAGS) jacobi.cu
+        echo "cuda code compiled"
 
 jacobi: jacobi.o matrix_util.o
 	$(CXX) $(CCFLAGS) -o $@ $^ $(LIBS)
