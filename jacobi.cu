@@ -8,7 +8,7 @@
 
 #include <cuda.h>
 #include "matrix_util.h"
-using namespace std;
+//using namespace std;
 
 void convertTo1D(double** A, double* A_1d, int N){
 	int k    = 0;
@@ -233,6 +233,6 @@ int main(int argc, char* argv[]){
 	time_secs = t_end - t_start;
 	//cout<< "Time(sec): "<< time_secs << endl;
 	print(X_New, N);
-	cout<< time_secs << endl;
+	printf("%lf\n", time_secs);
 	return 0;
 }
