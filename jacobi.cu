@@ -219,7 +219,7 @@ __global__ void jacobiOnDevice(double* A, double* b, double* X_New, double* X_Ol
 
 
 int main(int argc, char* argv[]){
-	int numBlocks = 8;
+	int numBlocks = 16;
 	int blockSize = 1;
 	// initialize timing variables
 	double t_start, t_end, time_secs;
@@ -305,7 +305,8 @@ double *X_New_gpu, *X_Old_gpu,
 		cudaMemcpy(X_Old, X_Old_gpu, sizeof(double)*N, cudaMemcpyDeviceToHost);
 
 	}while( (Iteration < maxit) && (getError(X_Old, X_New, N) >= eps));
-
+	//cudaMemcpy(X_New, X_New_gpu, sizeof(double)*N, cudaMemcpyDeviceToHost);
+print(X_New, N);
 	// Data <- device
 
 
@@ -319,6 +320,7 @@ double *X_New_gpu, *X_Old_gpu,
 	time_secs = t_end - t_start;
 	//cout<< "Time(sec): "<< time_secs << endl;
 	print(X_New, N);
+
 	printf("%lf\n", time_secs);
 	return 0;
 }
