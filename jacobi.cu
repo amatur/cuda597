@@ -351,8 +351,6 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 
 	//free(X_old);
 	//free(Bloc_X);
-	float milliseconds = 0;
-cudaEventElapsedTime(&milliseconds, start, stop);
 
 	cudaDeviceSynchronize();
 	t_end = clock();
@@ -360,7 +358,6 @@ cudaEventElapsedTime(&milliseconds, start, stop);
 	//cout<< "Time(sec): "<< time_secs << endl;
 
 	printf("%lf\n", time_secs);
-	printf("Milli %lf\n", milliseconds);
 
 	return 0;
 }
