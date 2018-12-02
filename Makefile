@@ -15,7 +15,7 @@ CXX=gcc
 LIBS=-lm
 LDFLAGS=""
 CCFLAGS=-g -O3
-
+CUDAFLAGS = -arch=sm_30 -m64 -O3 --use_fast_math
 #~ CCFLAGS=-Wall -O3
 
 
@@ -27,6 +27,19 @@ CCFLAGS=-g -O3
 
 all: jacobicu
 #all: jacobi jacobi_p_unopt jacobi_s jacobi_s_opt
+
+
+
+
+#-arch=compute_35 -code=sm_35
+jacobicu: jacobi.cu
+	$(CC) -o jacobi $(CUDAFLAGS) jacobi.cu 
+
+
+
+
+
+
 
 runcu:
 	echo "## RUNNING CUDA JACOBI"; ./jacobi 16 \
@@ -73,10 +86,6 @@ runsu:
 #~ test:
 #~ 	echo "TESTING";\
 #~ 	./test
-
-jacobicu: jacobi.cu
-	$(CC) -o jacobi $(CCFLAGS) -arch=compute_35 -code=sm_35 jacobi.cu 
-
 jacobi: jacobi.o matrix_util.o
 	$(CXX) $(CCFLAGS) -o $@ $^ $(LIBS)
 
