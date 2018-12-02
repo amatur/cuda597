@@ -197,12 +197,12 @@ double getError(double *x, double *xnew, int N)
 }
 
 // Device version of the Jacobi method
-__global__ void jacobiOnDevice(double* A, double* b, double* X_New, double* X_Old, int N){
+__global__ void jacobiOnDevice(double* A, double* b, double* X_New, double* X_Old, int N, int num_rows_block){
 	//int idx = blockIdx.x * blockDim.x + threadIdx.x;
 	//int my_rank = blockIdx.x;
 	//int num_rows_block = blockDim.x;
 	int my_rank = blockIdx.x;
-	int num_rows_block =  blockDim.x ;
+//	int num_rows_block =  blockDim.x ;
 	//now do it for multiple passes
 
 	for(int irow = my_rank*num_rows_block; irow<(my_rank+1)*num_rows_block; irow++  ){
@@ -213,6 +213,7 @@ __global__ void jacobiOnDevice(double* A, double* b, double* X_New, double* X_Ol
 		X_New[irow] = X_New[irow] / A[index + irow];
 		//sigma[i] /= A[i][i];
 	}
+	memcpy(X_Old, X_New, sizeof(double)*N);
 }
 
 
@@ -224,6 +225,10 @@ int main(int argc, char* argv[]){
 
 	double **A, *A_1d, *b;
 	double *X_New, *X_Old, *x;
+
+// gpu Copy
+double *A_1d_gpu, *b_gpu;
+double *X_New_gpu, *X_Old_gpu,
 
 	srand(0);
 	int n = strtol(argv[1], NULL, 10);
@@ -251,6 +256,29 @@ int main(int argc, char* argv[]){
 	jacobiSolve(N, A, b, x, eps, maxit);
 	print(x, N);
 
+
+
+	// STARTING cuda
+
+	// on HOST
+	//initialize auxiliary data structures
+	X_New  = (double *) malloc (N * sizeof(double));
+	X_Old  = (double *) malloc (N * sizeof(double));
+
+	// Allocate memory on the device
+	 assert(cudaSuccess == cudaMalloc((void **) &X_New_gpu, N*sizeof(double)));
+	 assert(cudaSuccess == cudaMalloc((void **) &A_1d_gpu, N*N*sizeof(double)));
+	 assert(cudaSuccess == cudaMalloc((void **) &X_Old_gpu, N*sizeof(double)));
+	 assert(cudaSuccess == cudaMalloc((void **) &b_gpu, N*sizeof(double)));
+
+	 // Copy data -> device
+	 cudaMemcpy(X_New_gpu, X_New, sizeof(double)*N, cudaMemcpyHostToDevice);
+	 cudaMemcpy(A_1d_gpu, A_1d, sizeof(double)*N*N, cudaMemcpyHostToDevice);
+	 cudaMemcpy(X_Old_gpu, X_Old, sizeof(double)*N, cudaMemcpyHostToDevice);
+	 cudaMemcpy(b_gpu, b, sizeof(double)*N, cudaMemcpyHostToDevice);
+
+
+
 	t_start = clock();
 
 	/* ...Convert Matrix_A into 1-D array Input_A ......*/
@@ -264,18 +292,26 @@ int main(int argc, char* argv[]){
 
 	//do sweeps until diff under tolerance
 	int Iteration = 0;
-	// on HOST
-	//initialize auxiliary data structures
-	X_New  = (double *) malloc (N * sizeof(double));
-	X_Old  = (double *) malloc (N * sizeof(double));
+
 
 	do{
 		//#error Add GPU kernel calls here (see CPU version above)
-
+		jacobiOnDevice<<16,1>>(A_1d_gpu, b_gpu, X_New_gpu, X_Old_gpu, N, num_rows_block);
 		//jacobi<<16,1>>
 		cudaDeviceSynchronize();
 		Iteration += 1;
+		cudaMemcpy(X_New, X_New_gpu, sizeof(double)*N, cudaMemcpyDeviceToHost);
+		cudaMemcpy(X_Old, X_Old_gpu, sizeof(double)*N, cudaMemcpyDeviceToHost);
+
 	}while( (Iteration < maxit) && (getError(X_Old, X_New, N) >= eps));
+
+	// Data <- device
+
+
+    // Free memory
+    free(X_Old); free(A); free(A_1d);free(A); free(b);
+    cudaFree(X_New_gpu); cudaFree(X_Old_gpu); cudaFree(b_gpu); cudaFree(A_1d_gpu);
+
 	//free(X_old);
 	//free(Bloc_X);
 	t_end = clock();
