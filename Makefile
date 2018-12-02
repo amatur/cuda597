@@ -13,7 +13,7 @@ CXX=mpic++
 
 LIBS=-lm
 
-CCFLAGS= -Wall -g -O3
+CCFLAGS= -g -O3
 
 #~ CCFLAGS=-Wall -O3
 
