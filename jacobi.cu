@@ -324,7 +324,7 @@ float *X_Old_gpu;
 
 	//fill b
 	//fillB(b, n);
-	b = &b_gpu[0];
+	b = thrust::raw_pointer_cast(&b_gpu[0]);
 
 
 	jacobiSolve(N, A, b, x, eps, maxit);
