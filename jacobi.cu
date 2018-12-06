@@ -322,10 +322,10 @@ float *X_Old_gpu;
 
 		     // Fill the arrays A and B on GPU with random numbers
 		  fillB_random_GPU(thrust::raw_pointer_cast(&b_gpu[0]), N);
-			saxpy_fast(5, b_gpu, b_gpu);
+			//saxpy_fast(5, b_gpu, b_gpu);
 
 	//fill b
-	fillB(b, n);
+	//fillB(b, n);
 	//b = thrust::raw_pointer_cast(&b_gpu[0]);
 	// thrust::device_ptr<int> dev_ptr = thrust::device_pointer_cast(&b_gpu[0]);
 	// for (size_t i = 0; i < N; i++) {
