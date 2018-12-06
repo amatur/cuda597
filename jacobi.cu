@@ -1,3 +1,4 @@
+#include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -267,6 +268,7 @@ __global__ void jacobiOnDevice(float* A, float* b, float* X_New, float* X_Old, i
 
 
 int main(int argc, char* argv[]){
+	timeval t1, t2; // Structs for timing
 	cudaEvent_t start, stop;
 	cudaEventCreate(&start);
 	cudaEventCreate(&stop);
@@ -370,7 +372,7 @@ float *X_Old_gpu;
 	// }
 
 	t_start = clock();
-
+gettimeofday(&t1, NULL);
 
 
 	int gridSize, blockSize, minGridSize;
@@ -421,12 +423,17 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 
 	cudaDeviceSynchronize();
 	t_end = clock();
+
+	gettimeofday(&t2, NULL);
+
 	time_secs = t_end - t_start;
 	//cout<< "Time(sec): "<< time_secs << endl;
 
 	printf("%lf\n", time_secs);
 
-
+	printf("Jacobi: %g seconds \n",
+	               t2.tv_sec - t1.tv_sec +
+	               (t2.tv_usec - t1.tv_usec) / 1.0e6);
 	// cudaEventSynchronize(stop);
 	// 	float milliseconds = 0;
 	// cudaEventElapsedTime(&milliseconds, start, stop);
