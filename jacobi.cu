@@ -291,7 +291,7 @@ int main(int argc, char* argv[]){
 
 // gpu Copy
 float *A_1d_gpu;
-//float *b_gpu;
+float *b_gpu;
 float *X_New_gpu;
 float *X_Old_gpu;
 
@@ -319,7 +319,7 @@ float *X_Old_gpu;
 
 
 		// STARTING cuda
-		thrust::device_vector<float> b_gpu(N);
+		//thrust::device_vector<float> b_gpu(N);
 
 		     // Fill the arrays A and B on GPU with random numbers
 		  //fillB_random_GPU(thrust::raw_pointer_cast(&b_gpu[0]), N);
