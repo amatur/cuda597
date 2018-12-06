@@ -313,8 +313,20 @@ float *X_Old_gpu;
 	//print(b, N);
 	init1d(&x, N);
 
+
+
+		// STARTING cuda
+		thrust::device_vector<float> b_gpu(N * N);
+
+		     // Fill the arrays A and B on GPU with random numbers
+		  fillB_random_GPU(thrust::raw_pointer_cast(&b_gpu[0]), N);
+			saxpy_fast(5, b_gpu, b_gpu);
+
 	//fill b
-	fillB(b, n);
+	//fillB(b, n);
+	b = &b_gpu[0];
+
+
 	jacobiSolve(N, A, b, x, eps, maxit);
 	print(x, N);
 	printf("Correct one\n");
@@ -325,12 +337,6 @@ float *X_Old_gpu;
 		//fillA_random_GPU(A,N);
 		convertTo1D(A, A_1d, N);
 
-	// STARTING cuda
-	thrust::device_vector<float> b_gpu(N * N);
-
-	     // Fill the arrays A and B on GPU with random numbers
-	  fillB_random_GPU(thrust::raw_pointer_cast(&b_gpu[0]), N);
-		saxpy_fast(5, b_gpu, b_gpu);
 	// on HOST
 	//initialize auxiliary data structures
 	X_New  = (float *) malloc (N * sizeof(float));
