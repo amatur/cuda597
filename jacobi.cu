@@ -399,7 +399,7 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 
 		//#error Add GPU kernel calls here (see CPU version above)
 		//jacobiOnDevice <<< 1, N >>> (A_1d_gpu, thrust::raw_pointer_cast(&b_gpu[0]), X_New_gpu, X_Old_gpu, N, eps);
-		jacobiOnDevice <<< 1, N >>> (A_1d_gpu,b_gpu, X_New_gpu, X_Old_gpu, N, eps);
+		jacobiOnDevice <<< block_size, n_blocks >>> (A_1d_gpu,b_gpu, X_New_gpu, X_Old_gpu, N, eps);
 
 		//jacobi<<16,1>>
 
@@ -411,7 +411,7 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 				cudaMemcpyFromSymbol(&cpuConvergenceTest, flag, sizeof(int));
 
 		Iteration += 1;
-		cudaDeviceSynchronize();
+		//cudaDeviceSynchronize();
 		cudaMemcpy(X_New, X_New_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 		cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 
