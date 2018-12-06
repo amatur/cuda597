@@ -166,17 +166,7 @@ void fillA_random(float **A, int n){
 }
 
 // Fill the array A(nr_rows_A, nr_cols_A) with random numbers on GPU
-  void fillA_random_GPU(float *A, int N) {
-      // Create a pseudo-random number generator
-			curandGenerator_t prng;
-      curandCreateGenerator(&prng, CURAND_RNG_PSEUDO_DEFAULT);
 
-     // Set the seed for the random number generator using the system clock
-     curandSetPseudoRandomGeneratorSeed(prng, (unsigned long long) clock());
-
-     // Fill the array with random numbers on the device
-     curandGenerateUniform(prng, A, N * N);
-}
 
 void fillA_poisson(float **A, int n){
 
@@ -204,6 +194,25 @@ void fillB(float *b, int n){
 	{
 		b[i] = -1 + 2.0* (float)rand()/(float)((RAND_MAX)*1.0);
 	}
+}
+
+void fillB_random_GPU(float *B, int N) {
+		// Create a pseudo-random number generator
+		curandGenerator_t prng;
+		curandCreateGenerator(&prng, CURAND_RNG_PSEUDO_DEFAULT);
+
+	 // Set the seed for the random number generator using the system clock
+	 curandSetPseudoRandomGeneratorSeed(prng, (unsigned long long) clock());
+
+	 // Fill the array with random numbers on the device
+	 curandGenerateUniform(prng, B, N * N);
+
+// 	 float myrandf = curand_uniform(&(my_curandstate[idx]));
+// myrandf *= (max_rand_int[idx] - min_rand_int[idx] + 0.999999);
+// myrandf += min_rand_int[idx];
+// int myrand = (int)truncf(myrandf);
+
+
 }
 
 float getError(float *x, float *xnew, int N)
@@ -294,13 +303,13 @@ float *X_New_gpu, *X_Old_gpu,
 		/* ...Convert Matrix_A into 1-D array Input_A ......*/
 		A_1d  = (float *)malloc(N*N*sizeof(float));
 		//fillA_random_GPU(A,N);
-		//convertTo1D(A, A_1d, N);
+		convertTo1D(A, A_1d, N);
 
 	// STARTING cuda
-	thrust::device_vector<float> A_1d_gpu(N * N);
+	thrust::device_vector<float> b_gpu(N * N);
 
 	     // Fill the arrays A and B on GPU with random numbers
-	  fillA_random_GPU(thrust::raw_pointer_cast(&A_1d_gpu[0]), N);
+	  fillB_random_GPU(thrust::raw_pointer_cast(&b_gpu[0]), N);
 	// on HOST
 	//initialize auxiliary data structures
 	X_New  = (float *) malloc (N * sizeof(float));
@@ -308,20 +317,20 @@ float *X_New_gpu, *X_Old_gpu,
 
 	// Allocate memory on the device
 	 assert(cudaSuccess == cudaMalloc((void **) &X_New_gpu, N*sizeof(float)));
-	 //assert(cudaSuccess == cudaMalloc((void **) &A_1d_gpu, N*N*sizeof(float)));
+	 assert(cudaSuccess == cudaMalloc((void **) &A_1d_gpu, N*N*sizeof(float)));
 	 assert(cudaSuccess == cudaMalloc((void **) &X_Old_gpu, N*sizeof(float)));
-	 assert(cudaSuccess == cudaMalloc((void **) &b_gpu, N*sizeof(float)));
+	 //assert(cudaSuccess == cudaMalloc((void **) &b_gpu, N*sizeof(float)));
 
 	 cudaError_t ct;
 	 // Copy data -> device
 	 ct = cudaMemcpy(X_New_gpu, X_New, sizeof(float)*N, cudaMemcpyHostToDevice);
 	 assert(ct==cudaSuccess);
-	 //ct = cudaMemcpy(A_1d_gpu, A_1d, sizeof(float)*N*N, cudaMemcpyHostToDevice);
-	 //assert(ct==cudaSuccess);
+	 ct = cudaMemcpy(A_1d_gpu, A_1d, sizeof(float)*N*N, cudaMemcpyHostToDevice);
+	 assert(ct==cudaSuccess);
 	 ct = cudaMemcpy(X_Old_gpu, X_Old, sizeof(float)*N, cudaMemcpyHostToDevice);
 	 assert(ct==cudaSuccess);
-	 ct = cudaMemcpy(b_gpu, b, sizeof(float)*N, cudaMemcpyHostToDevice);
-	 assert(ct==cudaSuccess);
+	 //ct = cudaMemcpy(b_gpu, b, sizeof(float)*N, cudaMemcpyHostToDevice);
+	 //assert(ct==cudaSuccess);
 
 	//  cudaStatus = cudaMemcpy(x0, dev_x0, matrixSize* sizeof(float), cudaMemcpyDeviceToHost);
 	// if (cudaStatus != cudaSuccess) {
@@ -351,7 +360,7 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 		cudaMemcpyToSymbol(flag, &cpuConvergenceTest, sizeof(int));
 
 		//#error Add GPU kernel calls here (see CPU version above)
-		jacobiOnDevice <<< 1, N >>> (thrust::raw_pointer_cast(&A_1d_gpu[0]), b_gpu, X_New_gpu, X_Old_gpu, N, eps);
+		jacobiOnDevice <<< 1, N >>> (A_1d_gpu, thrust::raw_pointer_cast(&b_gpu[0]), X_New_gpu, X_Old_gpu, N, eps);
 		//jacobi<<16,1>>
 
 		cudaError_t cudaStatus = cudaDeviceSynchronize();
@@ -371,8 +380,9 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 	// Data <- device
 
     // Free memory
-      cudaFree(X_New_gpu); cudaFree(X_Old_gpu); cudaFree(b_gpu);
-			//cudaFree(A_1d_gpu);
+      cudaFree(X_New_gpu); cudaFree(X_Old_gpu);
+			//cudaFree(b_gpu);
+			cudaFree(A_1d_gpu);
 			//free(X_Old); free(A); free(A_1d);free(A); free(b);
 
 	//free(X_old);
