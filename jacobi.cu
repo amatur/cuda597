@@ -261,7 +261,7 @@ __global__ void jacobiOnDevice(float* A, float* b, float* X_New, float* X_Old, i
 	//assert(A[i*N+i] != 0);
 	newValue = (b[i] - sigma) / A[i*N + i];
 
-	if (abs(X_Old[i] - newValue) > eps) flag = 0;
+	//if (abs(X_Old[i] - newValue) > eps) flag = 0;
 	X_Old[i] = newValue;
 	//newValue;
 
@@ -399,7 +399,7 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 
 		//#error Add GPU kernel calls here (see CPU version above)
 		//jacobiOnDevice <<< 1, N >>> (A_1d_gpu, thrust::raw_pointer_cast(&b_gpu[0]), X_New_gpu, X_Old_gpu, N, eps);
-		jacobiOnDevice <<< n_blocks, block_size >>> (A_1d_gpu,b_gpu, X_New_gpu, X_Old_gpu, N, eps);
+		jacobiOnDevice <<< 1, N >>> (A_1d_gpu,b_gpu, X_New_gpu, X_Old_gpu, N, eps);
 
 		//jacobi<<16,1>>
 
@@ -411,10 +411,11 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 				cudaMemcpyFromSymbol(&cpuConvergenceTest, flag, sizeof(int));
 
 		Iteration += 1;
-		//cudaMemcpy(X_New, X_New_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
-		//cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
+		cudaDeviceSynchronize();
+		cudaMemcpy(X_New, X_New_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
+		cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 
-	}while( (Iteration < maxit) && !cpuConvergenceTest);
+	}while( (Iteration < maxit) && getError(X_Old, X_New, N) >= eps);
 	cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 	print(X_Old, N);
 	// Data <- device
