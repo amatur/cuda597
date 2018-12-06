@@ -268,9 +268,9 @@ float *X_New_gpu, *X_Old_gpu,
 
 	//fill b
 	fillB(b, n);
-	//jacobiSolve(N, A, b, x, eps, maxit);
-	//print(x, N);
-	//printf("Correct one\n");
+	jacobiSolve(N, A, b, x, eps, maxit);
+	print(x, N);
+	printf("Correct one\n");
 
 
 		/* ...Convert Matrix_A into 1-D array Input_A ......*/
@@ -329,7 +329,7 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 		cudaMemcpyToSymbol(flag, &cpuConvergenceTest, sizeof(int));
 
 		//#error Add GPU kernel calls here (see CPU version above)
-		jacobiOnDevice <<< gridSize, blockSize >>> (A_1d_gpu, b_gpu, X_New_gpu, X_Old_gpu, N, eps);
+		jacobiOnDevice <<< 1, N >>> (A_1d_gpu, b_gpu, X_New_gpu, X_Old_gpu, N, eps);
 		//jacobi<<16,1>>
 
 		cudaError_t cudaStatus = cudaDeviceSynchronize();
@@ -345,12 +345,12 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 
 	}while( (Iteration < maxit) && !cpuConvergenceTest);
 	cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
-	//print(X_Old, N);
+	print(X_Old, N);
 	// Data <- device
 
     // Free memory
-    //free(X_Old); free(A); free(A_1d);free(A); free(b);
-  //  cudaFree(X_New_gpu); cudaFree(X_Old_gpu); cudaFree(b_gpu); cudaFree(A_1d_gpu);
+    free(X_Old); free(A); free(A_1d);free(A); free(b);
+    cudaFree(X_New_gpu); cudaFree(X_Old_gpu); cudaFree(b_gpu); cudaFree(A_1d_gpu);
 
 	//free(X_old);
 	//free(Bloc_X);
