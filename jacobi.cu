@@ -322,11 +322,11 @@ float *X_Old_gpu;
 		thrust::device_vector<float> b_gpu(N);
 
 		     // Fill the arrays A and B on GPU with random numbers
-		  fillB_random_GPU(thrust::raw_pointer_cast(&b_gpu[0]), N);
+		  //fillB_random_GPU(thrust::raw_pointer_cast(&b_gpu[0]), N);
 			//saxpy_fast(5, b_gpu, b_gpu);
 
 	//fill b
-	//fillB(b, n);
+	fillB(b, n);
 	//b = thrust::raw_pointer_cast(&b_gpu[0]);
 	// thrust::device_ptr<int> dev_ptr = thrust::device_pointer_cast(&b_gpu[0]);
 	// for (size_t i = 0; i < N; i++) {
@@ -353,7 +353,7 @@ float *X_Old_gpu;
 	 assert(cudaSuccess == cudaMalloc((void **) &X_New_gpu, N*sizeof(float)));
 	 assert(cudaSuccess == cudaMalloc((void **) &A_1d_gpu, N*N*sizeof(float)));
 	 assert(cudaSuccess == cudaMalloc((void **) &X_Old_gpu, N*sizeof(float)));
-	 //assert(cudaSuccess == cudaMalloc((void **) &b_gpu, N*sizeof(float)));
+	 assert(cudaSuccess == cudaMalloc((void **) &b_gpu, N*sizeof(float)));
 
 	 cudaError_t ct;
 	 // Copy data -> device
@@ -363,8 +363,8 @@ float *X_Old_gpu;
 	 assert(ct==cudaSuccess);
 	 ct = cudaMemcpy(X_Old_gpu, X_Old, sizeof(float)*N, cudaMemcpyHostToDevice);
 	 assert(ct==cudaSuccess);
-	 //ct = cudaMemcpy(b_gpu, b, sizeof(float)*N, cudaMemcpyHostToDevice);
-	 //assert(ct==cudaSuccess);
+	 ct = cudaMemcpy(b_gpu, b, sizeof(float)*N, cudaMemcpyHostToDevice);
+	 assert(ct==cudaSuccess);
 
 	//  cudaStatus = cudaMemcpy(x0, dev_x0, matrixSize* sizeof(float), cudaMemcpyDeviceToHost);
 	// if (cudaStatus != cudaSuccess) {
@@ -394,7 +394,9 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 		cudaMemcpyToSymbol(flag, &cpuConvergenceTest, sizeof(int));
 
 		//#error Add GPU kernel calls here (see CPU version above)
-		jacobiOnDevice <<< 1, N/8 >>> (A_1d_gpu, thrust::raw_pointer_cast(&b_gpu[0]), X_New_gpu, X_Old_gpu, N, eps);
+		//jacobiOnDevice <<< 1, N >>> (A_1d_gpu, thrust::raw_pointer_cast(&b_gpu[0]), X_New_gpu, X_Old_gpu, N, eps);
+		jacobiOnDevice <<< 1, N >>> (A_1d_gpu,b_gpu, X_New_gpu, X_Old_gpu, N, eps);
+
 		//jacobi<<16,1>>
 
 		cudaError_t cudaStatus = cudaDeviceSynchronize();
