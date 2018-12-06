@@ -13,7 +13,7 @@ CXX=gcc
 #CC=tau_cc.sh
 
 LIBS=-lm
-LDFLAGS=""
+LDFLAGS=-lcublas -lcurand
 CCFLAGS=-g -O3
 CUDAFLAGS = -arch=sm_30 -m64 -O3 --use_fast_math
 #~ CCFLAGS=-Wall -O3
@@ -33,7 +33,7 @@ all: jacobicu
 
 #-arch=compute_35 -code=sm_35
 jacobicu: jacobi.cu
-	$(CC) -o jacobi $(CUDAFLAGS) jacobi.cu 
+	$(CC) -o jacobi $(CUDAFLAGS) jacobi.cu $(LDFLAGS)
 
 
 
