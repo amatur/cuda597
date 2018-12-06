@@ -250,8 +250,8 @@ __global__ void jacobiOnDevice(float* A, float* b, float* X_New, float* X_Old, i
 	unsigned int i, j;
 	float sigma = 0, newValue;
 
-	//i = threadIdx.x + blockIdx.x * blockDim.x;
-i =  blockIdx.x ;
+	i = threadIdx.x + blockIdx.x * blockDim.x;
+	//i =  blockIdx.x ;
 	//printf("%d  IAAAA", i);
 	for (j = 0; j < N; j++) {
 		if (i != j) {
@@ -394,7 +394,7 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 		cudaMemcpyToSymbol(flag, &cpuConvergenceTest, sizeof(int));
 
 		//#error Add GPU kernel calls here (see CPU version above)
-		jacobiOnDevice <<< 1, N >>> (A_1d_gpu, thrust::raw_pointer_cast(&b_gpu[0]), X_New_gpu, X_Old_gpu, N, eps);
+		jacobiOnDevice <<< 1, N/8 >>> (A_1d_gpu, thrust::raw_pointer_cast(&b_gpu[0]), X_New_gpu, X_Old_gpu, N, eps);
 		//jacobi<<16,1>>
 
 		cudaError_t cudaStatus = cudaDeviceSynchronize();
@@ -417,10 +417,8 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
       cudaFree(X_New_gpu); cudaFree(X_Old_gpu);
 			//cudaFree(b_gpu);
 			cudaFree(A_1d_gpu);
-			//free(X_Old); free(A); free(A_1d);free(A); free(b);
+			free(X_Old);  free(A_1d);free(A); free(b);
 
-	//free(X_old);
-	//free(Bloc_X);
 
 	cudaDeviceSynchronize();
 	t_end = clock();
