@@ -197,7 +197,7 @@ struct saxpy_functor
 
     __host__ __device__
         float operator()(const float& x, const float& y) const {
-            return -1 + x/(float)((RAND_MAX)*1.0);
+            return -1 + (x+y)/(float)((RAND_MAX)*1.0);
         }
 };
 
