@@ -268,9 +268,10 @@ int main(int argc, char* argv[]){
 	float *X_New, *X_Old, *x;
 
 // gpu Copy
-float *A_1d_gpu,
+float *A_1d_gpu;
 //float *b_gpu;
-float *X_New_gpu, *X_Old_gpu;
+float *X_New_gpu;
+float *X_Old_gpu;
 
 	srand(0);
 	int n = strtol(argv[1], NULL, 10);
