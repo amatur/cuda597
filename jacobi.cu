@@ -250,7 +250,8 @@ __global__ void jacobiOnDevice(float* A, float* b, float* X_New, float* X_Old, i
 	unsigned int i, j;
 	float sigma = 0, newValue;
 
-	i = threadIdx.x + blockIdx.x * blockDim.x;
+	//i = threadIdx.x + blockIdx.x * blockDim.x;
+i =  threadIdx.x ;
 	//printf("%d  IAAAA", i);
 	for (j = 0; j < N; j++) {
 		if (i != j) {
@@ -434,9 +435,6 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 	printf("%g \n",
 	               t2.tv_sec - t1.tv_sec +
 	               (t2.tv_usec - t1.tv_usec) / 1.0e6);
-	// cudaEventSynchronize(stop);
-	// 	float milliseconds = 0;
-	// cudaEventElapsedTime(&milliseconds, start, stop);
-	// 	printf("Milli %lf\n", milliseconds);
+
 	return 0;
 }
