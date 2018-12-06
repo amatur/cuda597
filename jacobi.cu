@@ -224,7 +224,7 @@ void fillB_random_GPU(float *B, int N) {
 	 curandSetPseudoRandomGeneratorSeed(prng, (unsigned long long) clock());
 
 	 // Fill the array with random numbers on the device
-	 curandGenerateUniform(prng, B, N * N);
+	 curandGenerateUniform(prng, B, N);
 
 // 	 float myrandf = curand_uniform(&(my_curandstate[idx]));
 // myrandf *= (max_rand_int[idx] - min_rand_int[idx] + 0.999999);
