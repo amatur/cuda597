@@ -324,8 +324,12 @@ float *X_Old_gpu;
 
 	//fill b
 	//fillB(b, n);
-	b = thrust::raw_pointer_cast(&b_gpu[0]);
-
+	//b = thrust::raw_pointer_cast(&b_gpu[0]);
+	thrust::device_ptr<int> dev_ptr = thrust::device_pointer_cast(&b_gpu[0]);
+	for (size_t i = 0; i < N; i++) {
+		/* code */
+		b[i] = dev_ptr[i];
+	}
 
 	jacobiSolve(N, A, b, x, eps, maxit);
 	print(x, N);
