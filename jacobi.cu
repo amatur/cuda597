@@ -251,7 +251,7 @@ __global__ void jacobiOnDevice(float* A, float* b, float* X_New, float* X_Old, i
 	float sigma = 0, newValue;
 
 	//i = threadIdx.x + blockIdx.x * blockDim.x;
-i =  threadIdx.x ;
+i =  blockIdx.x ;
 	//printf("%d  IAAAA", i);
 	for (j = 0; j < N; j++) {
 		if (i != j) {
