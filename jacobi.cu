@@ -333,9 +333,9 @@ float *X_Old_gpu;
 	// 	b[i] = dev_ptr[i];
 	// }
 
-	jacobiSolve(N, A, b, x, eps, maxit);
-	print(x, N);
-	printf("Correct one\n");
+	//jacobiSolve(N, A, b, x, eps, maxit);
+	//print(x, N);
+	//printf("Correct one\n");
 
 
 		/* ...Convert Matrix_A into 1-D array Input_A ......*/
@@ -429,9 +429,9 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 	time_secs = t_end - t_start;
 	//cout<< "Time(sec): "<< time_secs << endl;
 
-	printf("%lf\n", time_secs);
+	//printf("%lf\n", time_secs);
 
-	printf("Jacobi: %g seconds \n",
+	printf("%g \n",
 	               t2.tv_sec - t1.tv_sec +
 	               (t2.tv_usec - t1.tv_usec) / 1.0e6);
 	// cudaEventSynchronize(stop);
