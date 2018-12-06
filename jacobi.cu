@@ -386,6 +386,10 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 	//do sweeps until diff under tolerance
 	//gridSize = strtol(argv[2], NULL, 10);
 	//blockSize = strtol(argv[3], NULL, 10);
+	int block_size = 4;
+  int n_blocks = N/block_size + (N%block_size == 0 ? 0:1);
+  //square_array <<< n_blocks, block_size >>> (a_d, N);
+
 	int Iteration = 0;
   cudaDeviceSynchronize();
 	int cpuConvergenceTest = 0;
@@ -395,7 +399,7 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 
 		//#error Add GPU kernel calls here (see CPU version above)
 		//jacobiOnDevice <<< 1, N >>> (A_1d_gpu, thrust::raw_pointer_cast(&b_gpu[0]), X_New_gpu, X_Old_gpu, N, eps);
-		jacobiOnDevice <<< 1, N >>> (A_1d_gpu,b_gpu, X_New_gpu, X_Old_gpu, N, eps);
+		jacobiOnDevice <<< n_blocks, block_size >>> (A_1d_gpu,b_gpu, X_New_gpu, X_Old_gpu, N, eps);
 
 		//jacobi<<16,1>>
 
