@@ -167,7 +167,8 @@ void fillA_random(float **A, int n){
 
 // Fill the array A(nr_rows_A, nr_cols_A) with random numbers on GPU
   void fillA_random_GPU(float *A, int N) {
-      // Create a pseudo-random number generator     curandGenerator_t prng;
+      // Create a pseudo-random number generator
+			curandGenerator_t prng;
       curandCreateGenerator(&prng, CURAND_RNG_PSEUDO_DEFAULT);
 
      // Set the seed for the random number generator using the system clock
