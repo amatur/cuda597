@@ -189,6 +189,25 @@ void fillA_poisson(float **A, int n){
 
 }
 
+struct saxpy_functor
+{
+    const float a;
+
+    saxpy_functor(float _a) : a(_a) {}
+
+    __host__ __device__
+        float operator()(const float& x, const float& y) const {
+            return -1 + 2.0* x/(float)((RAND_MAX)*1.0);
+        }
+};
+
+void saxpy_fast(float A, thrust::device_vector<float>& X, thrust::device_vector<float>& Y)
+{
+    // Y <- A * X + Y
+    thrust::transform(X.begin(), X.end(), Y.begin(), Y.begin(), saxpy_functor(A));
+}
+
+
 void fillB(float *b, int n){
 	for(int i =0; i<n; i++)
 	{
@@ -311,6 +330,7 @@ float *X_Old_gpu;
 
 	     // Fill the arrays A and B on GPU with random numbers
 	  fillB_random_GPU(thrust::raw_pointer_cast(&b_gpu[0]), N);
+		saxpy_fast(5, b_gpu, b_gpu);
 	// on HOST
 	//initialize auxiliary data structures
 	X_New  = (float *) malloc (N * sizeof(float));
