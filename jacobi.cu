@@ -269,10 +269,25 @@ __global__ void jacobiOnDevice(float* A, float* b, float* X_New, float* X_Old, i
 
 
 int main(int argc, char* argv[]){
+	int num_devices, device;
+	cudaGetDeviceCount(&num_devices);
+	if (num_devices > 1) {
+	  int max_multiprocessors = 0, max_device = 0;
+	  for (device = 0; device < num_devices; device++) {
+	          cudaDeviceProp properties;
+	          cudaGetDeviceProperties(&properties, device);
+	          if (max_multiprocessors < properties.multiProcessorCount) {
+	                  max_multiprocessors = properties.multiProcessorCount;
+	                  max_device = device;
+	          }
+	  }
+	  cudaSetDevice(max_device);
+		printf("device %d set\n", max_device);
+	}
+
+
 	timeval t1, t2; // Structs for timing
-	cudaEvent_t start, stop;
-	cudaEventCreate(&start);
-	cudaEventCreate(&stop);
+
 
 	cudaError_t  cudaStatus;
 
