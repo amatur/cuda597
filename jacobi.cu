@@ -256,7 +256,7 @@ float getError(float *x, float *xnew, int N)
 float getErrorThrust(float *X_Old_gpu, float *X_New_gpu, int N)
 {
 	saxpy_fast(5, X_New_gpu, X_Old_gpu);
-	float reduction = sqrt(thrust::transform_reduce(X_Old_gpu.begin(), X_Old_gpu.end(), square(), 0.0f, thrust::plus<float>()))
+	float reduction = sqrt(thrust::transform_reduce(X_Old_gpu.begin(), X_Old_gpu.end(), square(), 0.0f, thrust::plus<float>()));
 printf("%lf  HAHA \n", reduction);
 	return reduction;
 
@@ -327,8 +327,8 @@ int main(int argc, char* argv[]){
 // gpu Copy
 float *A_1d_gpu;
 float *b_gpu;
-float *X_New_gpu;
-float *X_Old_gpu;
+//float *X_New_gpu;
+//float *X_Old_gpu;
 
 	srand(0);
 	int n = strtol(argv[1], NULL, 10);
@@ -387,19 +387,19 @@ float *X_Old_gpu;
 	X_Old  = (float *) malloc (N * sizeof(float));
 
 	// Allocate memory on the device
-	 assert(cudaSuccess == cudaMalloc((void **) &X_New_gpu, N*sizeof(float)));
+	 //assert(cudaSuccess == cudaMalloc((void **) &X_New_gpu, N*sizeof(float)));
 	 assert(cudaSuccess == cudaMalloc((void **) &A_1d_gpu, N*N*sizeof(float)));
-	 assert(cudaSuccess == cudaMalloc((void **) &X_Old_gpu, N*sizeof(float)));
+	 //assert(cudaSuccess == cudaMalloc((void **) &X_Old_gpu, N*sizeof(float)));
 	 assert(cudaSuccess == cudaMalloc((void **) &b_gpu, N*sizeof(float)));
 
 	 cudaError_t ct;
 	 // Copy data -> device
-	 ct = cudaMemcpy(X_New_gpu, X_New, sizeof(float)*N, cudaMemcpyHostToDevice);
-	 assert(ct==cudaSuccess);
+	 //ct = cudaMemcpy(X_New_gpu, X_New, sizeof(float)*N, cudaMemcpyHostToDevice);
+	 //assert(ct==cudaSuccess);
 	 ct = cudaMemcpy(A_1d_gpu, A_1d, sizeof(float)*N*N, cudaMemcpyHostToDevice);
 	 assert(ct==cudaSuccess);
-	 ct = cudaMemcpy(X_Old_gpu, X_Old, sizeof(float)*N, cudaMemcpyHostToDevice);
-	 assert(ct==cudaSuccess);
+	 //ct = cudaMemcpy(X_Old_gpu, X_Old, sizeof(float)*N, cudaMemcpyHostToDevice);
+	 //assert(ct==cudaSuccess);
 	 ct = cudaMemcpy(b_gpu, b, sizeof(float)*N, cudaMemcpyHostToDevice);
 	 assert(ct==cudaSuccess);
 
@@ -436,7 +436,7 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 
 		//#error Add GPU kernel calls here (see CPU version above)
 		//jacobiOnDevice <<< 1, N >>> (A_1d_gpu, thrust::raw_pointer_cast(&b_gpu[0]), X_New_gpu, X_Old_gpu, N, eps);
-		jacobiOnDevice <<< block_size, n_blocks >>> (A_1d_gpu,b_gpu, X_New_gpu, X_Old_gpu, N, eps);
+		jacobiOnDevice <<< block_size, n_blocks >>> (A_1d_gpu,b_gpu, thrust::raw_pointer_cast(&X_New_gpu[0]), trust::raw_pointer_cast(&X_Old_gpu[0]), N, eps);
 
 		//jacobi<<16,1>>
 
@@ -452,10 +452,10 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 		//cudaMemcpy(X_New, X_New_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 		//cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 
-	}while( (Iteration < maxit) && getError(thrust::raw_pointer_cast(&X_Old_gpu[0]), thrust::raw_pointer_cast(&X_New_gpu[0]), N) >= eps);
+	}while( (Iteration < maxit) && getErrorThrust(thrust::raw_pointer_cast(&X_Old_gpu[0]), thrust::raw_pointer_cast(&X_New_gpu[0]), N) >= eps);
 
-
-	cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
+for (size_t i = 0; i < X_Old_gpu.size(); i++) printf("%lf ", X_Old_gpu[i]);
+	//cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 	print(X_Old, N);
 	// Data <- device
 
