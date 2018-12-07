@@ -11,9 +11,14 @@
 
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
+
+#include <thrust/device_vector.h>
+#include <thrust/functional.h>
+#include <thrust/transform_reduce.h>
+#include <thrust/iterator/zip_iterator.h>
 //using namespace std;
 
-/*
+
 template<typename T>
 class square_diff_thr : public thrust::unary_function<thrust::tuple<T, T>, T>
 {
@@ -59,7 +64,7 @@ T diffGPU(T *A_d, T *B_d, int N)
 
     return sqrt(a1/a2);
 }
-*/
+
 
 
 void init2d(float ***A, int n){
@@ -403,8 +408,8 @@ float *X_Old_gpu;
 	// 	b[i] = dev_ptr[i];
 	// }
 
-	jacobiSolve(N, A, b, x, eps, maxit);
-	print(x, N);
+	//jacobiSolve(N, A, b, x, eps, maxit);
+	//print(x, N);
 	printf("Correct one\n");
 
 
@@ -484,7 +489,10 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 		cudaMemcpy(X_New, X_New_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 		cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 
-	}while( (Iteration < maxit) && getError(X_Old, X_New, N) >= eps);
+	//}while( (Iteration < maxit) && getError(X_Old, X_New, N) >= eps);
+	}while( (Iteration < maxit) &&  diffGPU<double>(X_Old, X_New, N) >= eps);
+
+
 	//cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 	print(X_New, N);
 	// Data <- device
