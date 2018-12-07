@@ -36,7 +36,7 @@ float getError(float *x, float *xnew, int N)
   float *yy;
   init1d(&yy, N);
 
-  cublasInit();
+  cublasCreate (& handle );
   cublasSetVector(N, sizeof(x[0]), x, 1, d_x, 1);
   cublasSetVector(N, sizeof(xnew[0]), xnew, 1, d_y, 1);
 
