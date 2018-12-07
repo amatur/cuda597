@@ -42,7 +42,7 @@ To get b-matrix, b[i] = div ( G( Source(x,y) ) ) + Neighbor(target [i])
 Our ‘A’ matrix is sparse, so indirect solver Jacobi does better.
 Sparse matrices do not generally have sparse LU decomposition, so it gets  harder to fit the matrices in memory as the problem size goes larger.
 For Jacobi method, we store the A matrix in sparse representation.
-We tweaked the initial conditions to achieve fast convergence of direct  solver Jacobi.
+We tweaked the initial conditions to achieve fast convergence of iterative solver Jacobi.
 
 
 ** Effect of Parallelizing the Code **
