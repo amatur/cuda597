@@ -41,7 +41,7 @@ public:
 };
 
 template<typename T>
-T diffGPU(T *A_d, T *B_d, int N)
+T getErrorThrust(T *A_d, T *B_d, int N)
 {
     typedef thrust::device_ptr<T> FloatIterator;
     typedef thrust::tuple<FloatIterator, FloatIterator> IteratorTuple;
@@ -308,9 +308,6 @@ __global__ void jacobiOnDevice(float* A, float* b, float* X_New, float* X_Old, i
 
 	X_Old[i] = X_New[i];
 
-
-	//i =  blockIdx.x ;
-	//printf("%d  IAAAA", i);
 	for (j = 0; j < N; j++) {
 		if (i != j) {
 			sigma = sigma + A[i*N + j] * X_Old[j];
@@ -327,38 +324,28 @@ __global__ void jacobiOnDevice(float* A, float* b, float* X_New, float* X_Old, i
 
 
 int main(int argc, char* argv[]){
-	int num_devices, device;
-	cudaGetDeviceCount(&num_devices);
-	if (num_devices > 1) {
-	  int max_multiprocessors = 0, max_device = 0;
-	  for (device = 0; device < num_devices; device++) {
-	          cudaDeviceProp properties;
-	          cudaGetDeviceProperties(&properties, device);
-	          if (max_multiprocessors < properties.multiProcessorCount) {
-	                  max_multiprocessors = properties.multiProcessorCount;
-	                  max_device = device;
-	          }
-	  }
-	  cudaSetDevice(max_device);
-		printf("device %d set\n", max_device);
-	}
+	// int num_devices, device;
+	// cudaGetDeviceCount(&num_devices);
+	// if (num_devices > 1) {
+	//   int max_multiprocessors = 0, max_device = 0;
+	//   for (device = 0; device < num_devices; device++) {
+	//           cudaDeviceProp properties;
+	//           cudaGetDeviceProperties(&properties, device);
+	//           if (max_multiprocessors < properties.multiProcessorCount) {
+	//                   max_multiprocessors = properties.multiProcessorCount;
+	//                   max_device = device;
+	//           }
+	//   }
+	//   cudaSetDevice(max_device);
+	// 	printf("device %d set\n", max_device);
+	// }
 	cudaError_t  cudaStatus;
-
 	cudaStatus = cudaSetDevice(0);
 	if (cudaStatus != cudaSuccess) {
 		printf("cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");
-
 	}
 
-
 	timeval t1, t2; // Structs for timing
-
-
-
-	//int numBlocks = 4;
-	//int blockSize = 1;
-	// initialize timing variables
-	float t_start, t_end, time_secs;
 
 	float **A, *A_1d, *b;
 	float *X_New, *X_Old, *x;
@@ -410,7 +397,7 @@ float *X_Old_gpu;
 
 	//jacobiSolve(N, A, b, x, eps, maxit);
 	//print(x, N);
-	printf("Correct one\n");
+	//printf("Correct one\n");
 
 
 		/* ...Convert Matrix_A into 1-D array Input_A ......*/
@@ -440,26 +427,9 @@ float *X_Old_gpu;
 	 ct = cudaMemcpy(b_gpu, b, sizeof(float)*N, cudaMemcpyHostToDevice);
 	 assert(ct==cudaSuccess);
 
-	//  cudaStatus = cudaMemcpy(x0, dev_x0, matrixSize* sizeof(float), cudaMemcpyDeviceToHost);
-	// if (cudaStatus != cudaSuccess) {
-	// 	fprintf(stderr, "cudaMemcpy failed!");
-	// 	goto Error;
-	// }
 
-	t_start = clock();
-gettimeofday(&t1, NULL);
+	gettimeofday(&t1, NULL);
 
-
-	int gridSize, blockSize, minGridSize;
-   cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, jacobiOnDevice, 0, N);
-gridSize = (N + blockSize - 1) / blockSize;
-printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, blockSize);
-	//dim3 threadsPerBlock(16);
-	// dim3 numBlocks(N / threadsPerBlock.x);
-
-	//do sweeps until diff under tolerance
-	//gridSize = strtol(argv[2], NULL, 10);
-	//blockSize = strtol(argv[3], NULL, 10);
 	int block_size = strtol(argv[2], NULL, 10);
   int n_blocks = N/block_size + (N%block_size == 0 ? 0:1);
   //square_array <<< n_blocks, block_size >>> (a_d, N);
@@ -473,7 +443,7 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 
 		//#error Add GPU kernel calls here (see CPU version above)
 		//jacobiOnDevice <<< 1, N >>> (A_1d_gpu, thrust::raw_pointer_cast(&b_gpu[0]), X_New_gpu, X_Old_gpu, N, eps);
-		jacobiOnDevice <<< block_size, n_blocks >>> (A_1d_gpu,b_gpu, X_New_gpu, X_Old_gpu, N, eps);
+		jacobiOnDevice <<< n_blocks, block_size >>> (A_1d_gpu,b_gpu, X_New_gpu, X_Old_gpu, N, eps);
 
 		//jacobi<<16,1>>
 
@@ -490,29 +460,27 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 		cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 
 	//}while( (Iteration < maxit) && getError(X_Old, X_New, N) >= eps);
-	}while( (Iteration < maxit) &&  diffGPU<float>(X_Old_gpu, X_New_gpu, N) >= eps);
-
-
+	}while( (Iteration < maxit) &&  getErrorThrust<float>(X_Old_gpu, X_New_gpu, N) >= eps);
 	//cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 	print(X_New, N);
 	// Data <- device
 
     // Free memory
-      cudaFree(X_New_gpu); cudaFree(X_Old_gpu);
-			//cudaFree(b_gpu);
-			cudaFree(A_1d_gpu);
-			free(X_Old);  free(A_1d);free(A); free(b);
+  cudaFree(X_New_gpu);
+  cudaFree(X_Old_gpu);
+	cudaFree(b_gpu);
+	cudaFree(A_1d_gpu);
+	free(X_Old);
+  free(X_New);
+  free(A_1d);
+  free(A);
+  free(b);
 
 
 	cudaDeviceSynchronize();
-	t_end = clock();
 
 	gettimeofday(&t2, NULL);
 
-	time_secs = t_end - t_start;
-	//cout<< "Time(sec): "<< time_secs << endl;
-
-	//printf("%lf\n", time_secs);
 
 	printf("%g \n",
 	               t2.tv_sec - t1.tv_sec +
