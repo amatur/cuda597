@@ -42,29 +42,32 @@ jacobith: jacobi_thrust.cu
 jacobirand: jacobi_rand.cu
 	$(CC) -o jacobi_rand $(CUDAFLAGS) jacobi_rand.cu $(LDFLAGS)
 
+runcu:
+	echo "## RUNNING OPTIMIZED CUDA JACOBI"; ./jacobi 16 4\
 
 runcu:
-	echo "## RUNNING CUDA JACOBI"; ./jacobi 16 \
+		echo "## RUNNING CUDA JACOBI WITH THRUST (Unoptimized)"; ./jacobi 16 4\
 
+# data_parallel:
+# 	for i in 10;\
+# 	do	\
+# 		mpirun -np $$i ./jacobi 10; \
+# 	done
 
-data_parallel:
-	for i in 10;\
+data:
+	echo -e '"Dimension"' " " '"Time (sec)"' ;
+	for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 ;	\
 	do	\
-		mpirun -np $$i ./jacobi 10; \
+		echo $$i; \
+	 ./jacobi $$i $$i; \
 	done
 
-data_serial:
+data2:
 	echo -e '"Dimension"' " " '"Time (sec)"' ;
-	for i in 5 10 20 30 40 50 ;	\
+	for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 ;	\
 	do	\
-	 ./jacobi_s $$i; \
-	done
-
-data_serial_opt:
-	echo -e '"Dimension"' " " '"Time (sec)"' ;
-	for i in 5 10 20 30 40 50 ;	\
-	do	\
-	 ./jacobi_s_opt $$i; \
+		echo $$i; \
+	 ./jacobi_thrust $$i $$i; \
 	done
 
 run:
