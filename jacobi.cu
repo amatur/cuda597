@@ -9,7 +9,7 @@
 #include<assert.h>
 #include <curand.h>
 //#include <thrust\device_vector.h>
-#include <thrust\transform_reduce.h>
+#include <thrust/transform_reduce.h>
 #include <thrust/random.h>
 
 struct square { __host__ __device__ float operator()(float x) { return x * x; } };
