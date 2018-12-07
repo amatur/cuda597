@@ -6,19 +6,61 @@
 #include <time.h>
 #include <cstring>
 #include <cuda.h>
-#include<assert.h>
+#include <assert.h>
 #include <curand.h>
-//#include <thrust\device_vector.h>
-#include <thrust/transform_reduce.h>
-#include <thrust/random.h>
-
-struct square { __host__ __device__ float operator()(float x) { return x * x; } };
 
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
 //using namespace std;
 
-__device__ int flag;
+/*
+template<typename T>
+class square_diff_thr : public thrust::unary_function<thrust::tuple<T, T>, T>
+{
+public:
+    __host__ __device__
+    T operator()(const thrust::tuple<T, T>& x) const {
+        return (thrust::get<1>(x) - thrust::get<0>(x)) *
+            (thrust::get<1>(x) - thrust::get<0>(x));
+    }
+};
+
+template<typename T>
+class square_thr : public thrust::unary_function<T, T>
+{
+public:
+    __host__ __device__
+    T operator()(const T& x) const {
+        return x*x;
+    }
+};
+
+template<typename T>
+T diffGPU(T *A_d, T *B_d, int N)
+{
+    typedef thrust::device_ptr<T> FloatIterator;
+    typedef thrust::tuple<FloatIterator, FloatIterator> IteratorTuple;
+    typedef thrust::zip_iterator<IteratorTuple> ZipIterator;
+
+    thrust::device_ptr<T> A_ptr(A_d);
+    thrust::device_ptr<T> B_ptr(B_d);
+
+    ZipIterator first =
+        thrust::make_zip_iterator(thrust::make_tuple(A_ptr, B_ptr));
+    ZipIterator last =
+        thrust::make_zip_iterator(thrust::make_tuple(A_ptr + N*N,
+                                                     B_ptr + N*N));
+
+    T a1 = thrust::transform_reduce(first, last, square_diff_thr<T>(),
+                                  static_cast<T>(0), thrust::plus<T>());
+    T a2 = thrust::transform_reduce(B_ptr, B_ptr + N*N,
+                                  square_thr<T>(), static_cast<T>(0),
+                                  thrust::plus<T>());
+
+    return sqrt(a1/a2);
+}
+*/
+
 
 void init2d(float ***A, int n){
 	float** B = (float**) calloc(n,sizeof(float*));
@@ -195,25 +237,23 @@ void fillA_poisson(float **A, int n){
 
 }
 
-struct saxpy_functor
-{
-    const float a;
-
-    saxpy_functor(float _a) : a(_a) {}
-
-    __host__ __device__
-        float operator()(const float& x, const float& y) const {
-            //return -1 + (x+y)/(float)((RAND_MAX)*1.0);
-						return (x-y)*(x-y);
-        }
-};
-
-void saxpy_fast(float A, thrust::device_vector<float>& X, thrust::device_vector<float>& Y)
-{
-    // Y <- A * X + Y
-    thrust::transform(X.begin(), X.end(), Y.begin(), Y.begin(), saxpy_functor(A));
-}
-
+// struct saxpy_functor
+// {
+//     const float a;
+//
+//     saxpy_functor(float _a) : a(_a) {}
+//
+//     __host__ __device__
+//         float operator()(const float& x, const float& y) const {
+//             return -1 + (x+y)/(float)((RAND_MAX)*1.0);
+//         }
+// };
+//
+// void saxpy_fast(float A, thrust::device_vector<float>& X, thrust::device_vector<float>& Y)
+// {
+//     // Y <- A * X + Y
+//     thrust::transform(X.begin(), X.end(), Y.begin(), Y.begin(), saxpy_functor(A));
+// }
 
 
 void fillB(float *b, int n){
@@ -223,24 +263,25 @@ void fillB(float *b, int n){
 	}
 }
 
-void fillB_random_GPU(float *B, int N) {
-		// Create a pseudo-random number generator
-		curandGenerator_t prng;
-		curandCreateGenerator(&prng, CURAND_RNG_PSEUDO_DEFAULT);
+// void fillB_random_GPU(float *B, int N) {
+// 		// Create a pseudo-random number generator
+// 		curandGenerator_t prng;
+// 		curandCreateGenerator(&prng, CURAND_RNG_PSEUDO_DEFAULT);
+//
+// 	 // Set the seed for the random number generator using the system clock
+// 	 curandSetPseudoRandomGeneratorSeed(prng, (unsigned long long) clock());
+//
+// 	 // Fill the array with random numbers on the device
+// 	 curandGenerateUniform(prng, B, N);
+//
+// // 	 float myrandf = curand_uniform(&(my_curandstate[idx]));
+// // myrandf *= (max_rand_int[idx] - min_rand_int[idx] + 0.999999);
+// // myrandf += min_rand_int[idx];
+// // int myrand = (int)truncf(myrandf);
+//
+// }
 
-	 // Set the seed for the random number generator using the system clock
-	 curandSetPseudoRandomGeneratorSeed(prng, (unsigned long long) clock());
 
-	 // Fill the array with random numbers on the device
-	 curandGenerateUniform(prng, B, N);
-
-// 	 float myrandf = curand_uniform(&(my_curandstate[idx]));
-// myrandf *= (max_rand_int[idx] - min_rand_int[idx] + 0.999999);
-// myrandf += min_rand_int[idx];
-// int myrand = (int)truncf(myrandf);
-
-
-}
 
 float getError(float *x, float *xnew, int N)
 {
@@ -249,19 +290,7 @@ float getError(float *x, float *xnew, int N)
 	sum += (xnew[index] - x[index])*(xnew[index]-x[index]);
 	sum = sqrt(sum);
 	return(sum);
-
 }
-
-
-float getErrorThrust(float *X_Old_gpu, float *X_New_gpu, int N)
-{
-	saxpy_fast(5, X_New_gpu, X_Old_gpu);
-	float reduction = sqrt(thrust::transform_reduce(X_Old_gpu.begin(), X_Old_gpu.end(), square(), 0.0f, thrust::plus<float>()));
-printf("%lf  HAHA \n", reduction);
-	return reduction;
-
-}
-
 
 // Device version of the Jacobi method
 __global__ void jacobiOnDevice(float* A, float* b, float* X_New, float* X_Old, int N, float eps){
@@ -269,7 +298,12 @@ __global__ void jacobiOnDevice(float* A, float* b, float* X_New, float* X_Old, i
 	unsigned int i, j;
 	float sigma = 0, newValue;
 
+
 	i = threadIdx.x + blockIdx.x * blockDim.x;
+
+	X_Old[i] = X_New[i];
+
+
 	//i =  blockIdx.x ;
 	//printf("%d  IAAAA", i);
 	for (j = 0; j < N; j++) {
@@ -281,7 +315,7 @@ __global__ void jacobiOnDevice(float* A, float* b, float* X_New, float* X_Old, i
 	newValue = (b[i] - sigma) / A[i*N + i];
 
 	//if (abs(X_Old[i] - newValue) > eps) flag = 0;
-	X_Old[i] = newValue;
+	X_New[i] = newValue;
 	//newValue;
 
 }
@@ -327,8 +361,8 @@ int main(int argc, char* argv[]){
 // gpu Copy
 float *A_1d_gpu;
 float *b_gpu;
-//float *X_New_gpu;
-//float *X_Old_gpu;
+float *X_New_gpu;
+float *X_Old_gpu;
 
 	srand(0);
 	int n = strtol(argv[1], NULL, 10);
@@ -354,13 +388,11 @@ float *b_gpu;
 
 
 		// STARTING cuda
-		thrust::device_vector<float> X_Old_gpu(N);
-		thrust::device_vector<float> X_New_gpu(N);
+		//thrust::device_vector<float> b_gpu(N);
 
 		     // Fill the arrays A and B on GPU with random numbers
 		  //fillB_random_GPU(thrust::raw_pointer_cast(&b_gpu[0]), N);
-
-
+			//saxpy_fast(5, b_gpu, b_gpu);
 
 	//fill b
 	fillB(b, n);
@@ -387,19 +419,19 @@ float *b_gpu;
 	X_Old  = (float *) malloc (N * sizeof(float));
 
 	// Allocate memory on the device
-	 //assert(cudaSuccess == cudaMalloc((void **) &X_New_gpu, N*sizeof(float)));
+	 assert(cudaSuccess == cudaMalloc((void **) &X_New_gpu, N*sizeof(float)));
 	 assert(cudaSuccess == cudaMalloc((void **) &A_1d_gpu, N*N*sizeof(float)));
-	 //assert(cudaSuccess == cudaMalloc((void **) &X_Old_gpu, N*sizeof(float)));
+	 assert(cudaSuccess == cudaMalloc((void **) &X_Old_gpu, N*sizeof(float)));
 	 assert(cudaSuccess == cudaMalloc((void **) &b_gpu, N*sizeof(float)));
 
 	 cudaError_t ct;
 	 // Copy data -> device
-	 //ct = cudaMemcpy(X_New_gpu, X_New, sizeof(float)*N, cudaMemcpyHostToDevice);
-	 //assert(ct==cudaSuccess);
+	 ct = cudaMemcpy(X_New_gpu, X_New, sizeof(float)*N, cudaMemcpyHostToDevice);
+	 assert(ct==cudaSuccess);
 	 ct = cudaMemcpy(A_1d_gpu, A_1d, sizeof(float)*N*N, cudaMemcpyHostToDevice);
 	 assert(ct==cudaSuccess);
-	 //ct = cudaMemcpy(X_Old_gpu, X_Old, sizeof(float)*N, cudaMemcpyHostToDevice);
-	 //assert(ct==cudaSuccess);
+	 ct = cudaMemcpy(X_Old_gpu, X_Old, sizeof(float)*N, cudaMemcpyHostToDevice);
+	 assert(ct==cudaSuccess);
 	 ct = cudaMemcpy(b_gpu, b, sizeof(float)*N, cudaMemcpyHostToDevice);
 	 assert(ct==cudaSuccess);
 
@@ -429,14 +461,14 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 
 	int Iteration = 0;
   cudaDeviceSynchronize();
-	int cpuConvergenceTest = 0;
+	//nt cpuConvergenceTest = 0;
 	do{
-		cpuConvergenceTest = 1;
-		cudaMemcpyToSymbol(flag, &cpuConvergenceTest, sizeof(int));
+		// cpuConvergenceTest = 1;
+		// cudaMemcpyToSymbol(flag, &cpuConvergenceTest, sizeof(int));
 
 		//#error Add GPU kernel calls here (see CPU version above)
 		//jacobiOnDevice <<< 1, N >>> (A_1d_gpu, thrust::raw_pointer_cast(&b_gpu[0]), X_New_gpu, X_Old_gpu, N, eps);
-		jacobiOnDevice <<< block_size, n_blocks >>> (A_1d_gpu,b_gpu, thrust::raw_pointer_cast(&X_New_gpu[0]), trust::raw_pointer_cast(&X_Old_gpu[0]), N, eps);
+		jacobiOnDevice <<< block_size, n_blocks >>> (A_1d_gpu,b_gpu, X_New_gpu, X_Old_gpu, N, eps);
 
 		//jacobi<<16,1>>
 
@@ -445,17 +477,15 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 					printf("cudaDeviceSynchronize returned error code %d after launching jacobi!\n", cudaStatus);
 				}
 
-				cudaMemcpyFromSymbol(&cpuConvergenceTest, flag, sizeof(int));
+				//cudaMemcpyFromSymbol(&cpuConvergenceTest, flag, sizeof(int));
 
 		Iteration += 1;
 		//cudaDeviceSynchronize();
-		//cudaMemcpy(X_New, X_New_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
-		//cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
+		cudaMemcpy(X_New, X_New_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
+		cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 
-	}while( (Iteration < maxit) && getErrorThrust(thrust::raw_pointer_cast(&X_Old_gpu[0]), thrust::raw_pointer_cast(&X_New_gpu[0]), N) >= eps);
-
-for (size_t i = 0; i < X_Old_gpu.size(); i++) printf("%lf ", X_Old_gpu[i]);
-	//cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
+	}while( (Iteration < maxit) && getError(X_Old, X_New, N) >= eps);
+	cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 	print(X_Old, N);
 	// Data <- device
 
