@@ -36,7 +36,7 @@ jacobicu: jacobi.cu
 	$(CC) -o jacobi $(CUDAFLAGS) jacobi.cu $(LDFLAGS)
 
 jacobith: jacobi_thrust.cu
-	$(CC) -o jacobi_th $(CUDAFLAGS) jacobi_thrust.cu $(LDFLAGS)
+	$(CC) -o jacobi_thrust $(CUDAFLAGS) jacobi_thrust.cu $(LDFLAGS)
 
 
 jacobirand: jacobi_rand.cu
@@ -45,8 +45,8 @@ jacobirand: jacobi_rand.cu
 runcu:
 	echo "## RUNNING OPTIMIZED CUDA JACOBI"; ./jacobi 16 4\
 
-runcu:
-		echo "## RUNNING CUDA JACOBI WITH THRUST (Unoptimized)"; ./jacobi 16 4\
+runth:
+		echo "## RUNNING CUDA JACOBI WITH THRUST (Unoptimized)"; ./jacobi_thrust 16 4\
 
 # data_parallel:
 # 	for i in 10;\
