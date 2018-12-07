@@ -473,7 +473,7 @@ float *X_Old_gpu;
     // Free memory
   cudaFree(X_New_gpu);
   cudaFree(X_Old_gpu);
-	cudaFree(b_gpu);
+	//cudaFree(b_gpu);
 	cudaFree(A_1d_gpu);
 	free(X_Old);
   free(X_New);
