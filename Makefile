@@ -53,6 +53,9 @@ runcu:
 runth:
 		echo "## RUNNING CUDA JACOBI WITH THRUST (Unoptimized)"; ./jacobi_thrust 16 4\
 
+runcublas:
+		echo "## RUNNING CUDA JACOBI WITH CUBLAS"; ./jacobi_cublas 16 4\
+
 # data_parallel:
 # 	for i in 10;\
 # 	do	\
@@ -75,56 +78,6 @@ data2:
 	 ./jacobi_cublas $$i $$i; \
 	done
 
-run:
-	echo "### RUN PARALLEL:"; mpirun -np 10 ./jacobi 40 \
-	echo "RUN SERIAL"; ./jacobi_s_opt 40 \
-
-
-runp:
-	echo "## RUNNING PARALLEL JACOBI"; mpirun -np 10 ./jacobi 40 \
-
-runs:
-	echo "## RUNNING SERIAL JACOBI"; ./jacobi_s_opt 40 \
-
-
-runpu:
-	echo "## RUNNING PARALLEL JACOBI *Unoptimized*"; mpirun -np 10 ./jacobi_p_unopt 40 \
-
-runsu:
-	echo "## RUNNING SERIAL JACOBI *Unoptimized*"; ./jacobi_s 10 \
-
-#~ test:
-#~ 	echo "TESTING";\
-#~ 	./test
-jacobi: jacobi.o matrix_util.o
-	$(CXX) $(CCFLAGS) -o $@ $^ $(LIBS)
-
-jacobi_s: jacobi_s.o matrix_util.o
-	$(CC) $(CCFLAGS) -o $@ $^
-
-jacobi_s.o: jacobi_s.cpp jacobi.h
-	$(CC) $(CCFLAGS) -c $<
-
-jacobi_s_opt: jacobi_s_opt.o matrix_util.o
-	$(CC) $(CCFLAGS) -o $@ $^
-
-jacobi_s_opt.o: jacobi_s_opt.cpp jacobi.h
-	$(CC) $(CCFLAGS) -c $<
-
-
-jacobi_p_unopt: jacobi_p_unopt.o matrix_util.o
-	$(CXX) $(CCFLAGS) -o $@ $^
-
-jacobi_p_unopt.o: jacobi_p_unopt.cpp jacobi.h
-	$(CXX) $(CCFLAGS) -c $<
-
-
-
-lu: lu.o matrix_util.o
-	$(CXX) $(CCFLAGS) -o $@ $^
-
-test: test.o jacobi.o lu.o matrix_util.o
-	$(CXX) $(CCFLAGS) -o $@ $^
 
 %.o: %.cpp %.h
 	$(CXX) $(CCFLAGS) -c $<
@@ -133,4 +86,4 @@ test: test.o jacobi.o lu.o matrix_util.o
 	$(CXX) $(CCFLAGS) -c $<
 
 clean:
-	rm -f *.o jacobi lu test jacobi_s jacobi_s_opt jacobi_p_unopt profile.*
+	rm -f *.o jacobi  jacobi_rand jacobi_cublas jacobi_thrust

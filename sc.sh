@@ -1,12 +1,9 @@
 #to find factors of a number
+for i in 1 2 4 5 10 16  20  40 80; do
 
-for (( i=1; i<=100; i++ ));do
         echo $i;
-        mpirun -q -np $i ./jacobi 48;
+        ./jacobi 80 $i;
         #num=$((num/$i))
 done > file.txt
-sed -i '/MXM/d' ./file.txt
 sed -n 1~2p file.txt
 sed -n 2~2p file.txt
-
-
