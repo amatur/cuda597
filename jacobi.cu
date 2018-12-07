@@ -8,6 +8,11 @@
 #include <cuda.h>
 #include<assert.h>
 #include <curand.h>
+//#include <thrust\device_vector.h>
+#include <thrust\transform_reduce.h>
+#include <thrust/random.h>
+
+struct square { __host__ __device__ float operator()(float x) { return x * x; } };
 
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
@@ -198,7 +203,8 @@ struct saxpy_functor
 
     __host__ __device__
         float operator()(const float& x, const float& y) const {
-            return -1 + (x+y)/(float)((RAND_MAX)*1.0);
+            //return -1 + (x+y)/(float)((RAND_MAX)*1.0);
+						return (x-y)*(x-y);
         }
 };
 
@@ -207,6 +213,7 @@ void saxpy_fast(float A, thrust::device_vector<float>& X, thrust::device_vector<
     // Y <- A * X + Y
     thrust::transform(X.begin(), X.end(), Y.begin(), Y.begin(), saxpy_functor(A));
 }
+
 
 
 void fillB(float *b, int n){
@@ -242,7 +249,19 @@ float getError(float *x, float *xnew, int N)
 	sum += (xnew[index] - x[index])*(xnew[index]-x[index]);
 	sum = sqrt(sum);
 	return(sum);
+
 }
+
+
+float getErrorThrust(float *X_Old_gpu, float *X_New_gpu, int N)
+{
+	saxpy_fast(5, X_New_gpu, X_Old_gpu);
+	float reduction = sqrt(thrust::transform_reduce(X_Old_gpu.begin(), X_Old_gpu.end(), square(), 0.0f, thrust::plus<float>()))
+printf("%lf  HAHA \n", reduction);
+	return reduction;
+
+}
+
 
 // Device version of the Jacobi method
 __global__ void jacobiOnDevice(float* A, float* b, float* X_New, float* X_Old, int N, float eps){
@@ -284,11 +303,6 @@ int main(int argc, char* argv[]){
 	  cudaSetDevice(max_device);
 		printf("device %d set\n", max_device);
 	}
-
-
-	timeval t1, t2; // Structs for timing
-
-
 	cudaError_t  cudaStatus;
 
 	cudaStatus = cudaSetDevice(0);
@@ -296,6 +310,12 @@ int main(int argc, char* argv[]){
 		printf("cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");
 
 	}
+
+
+	timeval t1, t2; // Structs for timing
+
+
+
 	//int numBlocks = 4;
 	//int blockSize = 1;
 	// initialize timing variables
@@ -334,11 +354,13 @@ float *X_Old_gpu;
 
 
 		// STARTING cuda
-		//thrust::device_vector<float> b_gpu(N);
+		thrust::device_vector<float> X_Old_gpu(N);
+		thrust::device_vector<float> X_New_gpu(N);
 
 		     // Fill the arrays A and B on GPU with random numbers
 		  //fillB_random_GPU(thrust::raw_pointer_cast(&b_gpu[0]), N);
-			//saxpy_fast(5, b_gpu, b_gpu);
+
+
 
 	//fill b
 	fillB(b, n);
@@ -427,10 +449,12 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 
 		Iteration += 1;
 		//cudaDeviceSynchronize();
-		cudaMemcpy(X_New, X_New_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
-		cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
+		//cudaMemcpy(X_New, X_New_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
+		//cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 
-	}while( (Iteration < maxit) && getError(X_Old, X_New, N) >= eps);
+	}while( (Iteration < maxit) && getError(thrust::raw_pointer_cast(&X_Old_gpu[0]), thrust::raw_pointer_cast(&X_New_gpu[0]), N) >= eps);
+
+
 	cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 	print(X_Old, N);
 	// Data <- device
