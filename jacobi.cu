@@ -403,9 +403,9 @@ float *X_Old_gpu;
 	// 	b[i] = dev_ptr[i];
 	// }
 
-	//jacobiSolve(N, A, b, x, eps, maxit);
-	//print(x, N);
-	//printf("Correct one\n");
+	jacobiSolve(N, A, b, x, eps, maxit);
+	print(x, N);
+	printf("Correct one\n");
 
 
 		/* ...Convert Matrix_A into 1-D array Input_A ......*/
@@ -485,8 +485,8 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 		cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 
 	}while( (Iteration < maxit) && getError(X_Old, X_New, N) >= eps);
-	cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
-	print(X_Old, N);
+	//cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
+	print(X_New, N);
 	// Data <- device
 
     // Free memory
