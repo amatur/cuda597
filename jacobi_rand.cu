@@ -270,10 +270,10 @@ void fillB(float *b, int n){
 
 __global__
 void randFix(float *b){
-		b[blockIdx.x] = -1 + 2.0* b[blockIdx.x]/(float)((RAND_MAX)*1.0);
+		b[blockIdx.x] = -1 + 2.0* b[blockIdx.x];
 }
 
-void fillB_random_GPU(float *B, int N) {
+void fillB_random_GPU(float *B, int N, int block_size) {
 		// Create a pseudo-random number generator
 		curandGenerator_t prng;
 		curandCreateGenerator(&prng, CURAND_RNG_PSEUDO_DEFAULT);
@@ -283,7 +283,7 @@ void fillB_random_GPU(float *B, int N) {
    //clock()
 	 // Fill the array with random numbers on the device
 	 curandGenerateUniform(prng, B, N);
-   randFix<<<N, 1>>>(B);
+   randFix<<<N/block_size,block_size>>>(B);
 // 	 float myrandf = curand_uniform(&(my_curandstate[idx]));
 // myrandf *= (max_rand_int[idx] - min_rand_int[idx] + 0.999999);
 // myrandf += min_rand_int[idx];
@@ -369,6 +369,9 @@ float *X_Old_gpu;
 	float eps = 1.0e-4;
 	int maxit = 2*N*N;
 
+  int block_size = strtol(argv[2], NULL, 10);
+  int n_blocks = N/block_size + (N%block_size == 0 ? 0:1);
+
 
 	init2d(&A, N);
 	fillA_poisson(A, n);
@@ -388,7 +391,7 @@ float *X_Old_gpu;
 		thrust::device_vector<float> b_gpu(N);
 
 		     // Fill the arrays A and B on GPU with random numbers
-		  fillB_random_GPU(thrust::raw_pointer_cast(&b_gpu[0]), N);
+		  fillB_random_GPU(thrust::raw_pointer_cast(&b_gpu[0]), N, block_size);
 			//saxpy_fast(5, b_gpu, b_gpu);
 
 	//fill b
@@ -435,8 +438,7 @@ float *X_Old_gpu;
 
 	gettimeofday(&t1, NULL);
 
-	int block_size = strtol(argv[2], NULL, 10);
-  int n_blocks = N/block_size + (N%block_size == 0 ? 0:1);
+
   //square_array <<< n_blocks, block_size >>> (a_d, N);
 
 	int Iteration = 0;
