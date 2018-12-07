@@ -486,11 +486,11 @@ printf("min grid size %d grid size %d, block size %d",minGridSize,gridSize, bloc
 
 		Iteration += 1;
 		//cudaDeviceSynchronize();
-		cudaMemcpy(X_New, X_New_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
-		cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
+		//cudaMemcpy(X_New, X_New_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
+		//cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
 
-	}while( (Iteration < maxit) && getError(X_Old, X_New, N) >= eps);
-	//}while( (Iteration < maxit) &&  diffGPU<float>(X_Old_gpu, X_New_gpu, N) >= eps);
+	//}while( (Iteration < maxit) && getError(X_Old, X_New, N) >= eps);
+	}while( (Iteration < maxit) &&  diffGPU<float>(X_Old_gpu, X_New_gpu, N) >= eps);
 
 
 	//cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
