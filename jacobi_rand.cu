@@ -390,23 +390,7 @@ float *X_Old_gpu;
 		// STARTING cuda
 		thrust::device_vector<float> b_gpu(N);
 
-		     // Fill the arrays A and B on GPU with random numbers
-		  fillB_random_GPU(thrust::raw_pointer_cast(&b_gpu[0]), N, block_size);
-			//saxpy_fast(5, b_gpu, b_gpu);
-
-	//fill b
-	//fillB(b, n);
-	//b = thrust::raw_pointer_cast(&b_gpu[0]);
-	// thrust::device_ptr<int> dev_ptr = thrust::device_pointer_cast(&b_gpu[0]);
-	// for (size_t i = 0; i < N; i++) {
-	// 	/* code */
-	// 	b[i] = dev_ptr[i];
-	// }
-
-	//jacobiSolve(N, A, b, x, eps, maxit);
-	//print(x, N);
-	//printf("Correct one\n");
-
+		fillB_random_GPU(thrust::raw_pointer_cast(&b_gpu[0]), N, block_size);
 
 		/* ...Convert Matrix_A into 1-D array Input_A ......*/
 		A_1d  = (float *)malloc(N*N*sizeof(float));
@@ -469,7 +453,7 @@ float *X_Old_gpu;
 	}while( (Iteration < maxit) && getError(X_Old, X_New, N) >= eps);
 	//}while( (Iteration < maxit) &&  getErrorThrust<float>(X_Old_gpu, X_New_gpu, N) >= eps);
 	//cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
-	print(X_New, N);
+	//print(X_New, N);
 	// Data <- device
 
     // Free memory

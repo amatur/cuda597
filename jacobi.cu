@@ -462,7 +462,7 @@ float *X_Old_gpu;
 	}while( (Iteration < maxit) && getError(X_Old, X_New, N) >= eps);
 	//}while( (Iteration < maxit) &&  getErrorThrust<float>(X_Old_gpu, X_New_gpu, N) >= eps);
 	//cudaMemcpy(X_Old, X_Old_gpu, sizeof(float)*N, cudaMemcpyDeviceToHost);
-	print(X_New, N);
+	//print(X_New, N);
 	// Data <- device
 
     // Free memory
