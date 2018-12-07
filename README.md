@@ -1,13 +1,15 @@
-# Basic Info
+# Parallelized Jacobi for Fast Poisson Image Blending 
 
 Author: Amatur Rahman
 
-Date: Nov 5, 2018
+Date: December 7, 2018
 
 Please see license.txt for licensing information
 
-The complete instruction to run this  is available at the PDF report.
+The complete instruction to run this is available at the PDF report (report.pdf)
+
+For a quick summary of the project: see the poster (poster.pdf)
 
 
 The tex files are available at:
-https://www.overleaf.com/project/5bc89e74cb563c42ea67b648
+https://www.overleaf.com/project/5c08c5826bfb6a6fabd2bd74
