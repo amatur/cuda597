@@ -8,7 +8,6 @@
 #include <cuda.h>
 #include <assert.h>
 #include <curand.h>
-#include <cublas_v2.h>
 #include <cublas.h>
 
 #include <thrust/host_vector.h>
