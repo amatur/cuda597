@@ -37,7 +37,7 @@ float getError(float *x, float *xnew, int N)
 
   cublasSaxpy(N, -1.0f, d_x, 1, d_y, 1);
 
-  cublasGetVector(N, sizeof(yy[0]), d_y, 1, y, 1);
+  cublasGetVector(N, sizeof(yy[0]), d_y, 1, yy, 1);
   float sum = cublasSasum (N,  d_y, 1);
   cublasShutdown();
   return sum;
