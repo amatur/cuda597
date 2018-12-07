@@ -15,7 +15,7 @@ CXX=gcc
 LIBS=-lm
 LDFLAGS=-lcublas -lcurand
 CCFLAGS=-g -O3
-CUDAFLAGS = -arch=sm_30 -m64 -O3 --use_fast_math
+CUDAFLAGS = -arch=sm_35 -m64 -O3 --use_fast_math
 #~ CCFLAGS=-Wall -O3
 
 
@@ -25,7 +25,7 @@ CUDAFLAGS = -arch=sm_30 -m64 -O3 --use_fast_math
 #uncomment this line for Parallel only
 #all: jacobi jacobi_p_unopt
 
-all: jacobicu
+all: jacobicu jacobith jacobirand
 #all: jacobi jacobi_p_unopt jacobi_s jacobi_s_opt
 
 
@@ -35,10 +35,12 @@ all: jacobicu
 jacobicu: jacobi.cu
 	$(CC) -o jacobi $(CUDAFLAGS) jacobi.cu $(LDFLAGS)
 
+jacobith: jacobi_thrust.cu
+	$(CC) -o jacobi_th $(CUDAFLAGS) jacobi_thrust.cu $(LDFLAGS)
 
 
-
-
+jacobirand: jacobi_rand.cu
+	$(CC) -o jacobi_rand $(CUDAFLAGS) jacobi_rand.cu $(LDFLAGS)
 
 
 runcu:
