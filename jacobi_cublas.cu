@@ -8,7 +8,7 @@
 #include <cuda.h>
 #include <assert.h>
 #include <curand.h>
-#include <cublas.h>
+#include <cublas_v2.h>
 
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
@@ -26,11 +26,16 @@ void init1d(float **A, int n){
 
 float getError(float *x, float *xnew, int N)
 {
+  cublasHandle_t handle ;
 
   float *d_x;
   float *d_y;
-    float *yy;
-    init1d(&yy, N);
+  cudaMalloc (( void **)& d_x ,N* sizeof (*x));
+  cudaMalloc (( void **)& d_y ,N* sizeof (*xnew));
+
+  float *yy;
+  init1d(&yy, N);
+
   cublasInit();
   cublasSetVector(N, sizeof(x[0]), x, 1, d_x, 1);
   cublasSetVector(N, sizeof(xnew[0]), xnew, 1, d_y, 1);
@@ -38,8 +43,13 @@ float getError(float *x, float *xnew, int N)
   cublasSaxpy(N, -1.0f, d_x, 1, d_y, 1);
 
   cublasGetVector(N, sizeof(yy[0]), d_y, 1, yy, 1);
-  float sum = cublasSasum (N,  d_y, 1);
-  //cublasShutdown();
+  float sum;
+  cublasSasum(handle,N,d_y,1,&sum);
+
+  cudaFree (d_x ); // free device memory
+  cudaFree (d_y ); // free device memory
+  cublasDestroy ( handle );
+
   return sum;
 }
 
