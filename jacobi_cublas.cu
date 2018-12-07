@@ -40,7 +40,8 @@ float getError(float *x, float *xnew, int N)
   cublasSetVector(N, sizeof(x[0]), x, 1, d_x, 1);
   cublasSetVector(N, sizeof(xnew[0]), xnew, 1, d_y, 1);
 
-  cublasSaxpy(N, -1.0f, d_x, 1, d_y, 1);
+float al = -1.0f;
+  cublasSaxpy(handle, N, &al, d_x, 1, d_y, 1);
 
   cublasGetVector(N, sizeof(yy[0]), d_y, 1, yy, 1);
 
