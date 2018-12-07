@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <curand.h>
 #include <cublas_v2.h>
+#include <cublas.h>
 
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
@@ -19,6 +20,10 @@
 #include <thrust/iterator/zip_iterator.h>
 //using namespace std;
 
+void init1d(float **A, int n){
+	float* B = (float*) calloc(n,sizeof(float));
+	*A = B;
+}
 
 float getError(float *x, float *xnew, int N)
 {
@@ -26,7 +31,7 @@ float getError(float *x, float *xnew, int N)
   float *d_x;
   float *d_y;
     float *yy;
-    init1d(yy, N);
+    init1d(&yy, N);
   cublasInit();
   cublasSetVector(N, sizeof(x[0]), x, 1, d_x, 1);
   cublasSetVector(N, sizeof(xnew[0]), xnew, 1, d_y, 1);
@@ -111,10 +116,6 @@ void init2d(float ***A, float ***A2, int n){
 
 
 
-void init1d(float **A, int n){
-	float* B = (float*) calloc(n,sizeof(float));
-	*A = B;
-}
 
 
 void print(float *mat, int numRows){
