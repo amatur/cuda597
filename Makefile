@@ -25,7 +25,8 @@ CUDAFLAGS = -arch=sm_35 -m64 -O3 --use_fast_math
 #uncomment this line for Parallel only
 #all: jacobi jacobi_p_unopt
 
-all: jacobicu jacobith jacobirand
+all: jacobicu jacobith jacobicublas
+	#jacobirand
 #all: jacobi jacobi_p_unopt jacobi_s jacobi_s_opt
 
 
@@ -41,6 +42,10 @@ jacobith: jacobi_thrust.cu
 
 jacobirand: jacobi_rand.cu
 	$(CC) -o jacobi_rand $(CUDAFLAGS) jacobi_rand.cu $(LDFLAGS)
+
+jacobicublas: jacobi_cublas.cu
+		$(CC) -o jacobi_cublas $(CUDAFLAGS) jacobi_cublas.cu $(LDFLAGS)
+
 
 runcu:
 	echo "## RUNNING OPTIMIZED CUDA JACOBI"; ./jacobi 16 4\
@@ -67,7 +72,7 @@ data2:
 	for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 ;	\
 	do	\
 		echo $$i; \
-	 ./jacobi_thrust $$i $$i; \
+	 ./jacobi_cublas $$i $$i; \
 	done
 
 run:
